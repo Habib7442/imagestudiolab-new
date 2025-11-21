@@ -24,7 +24,7 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: "ImageStudioLab - PolaroidX",
-  description: "Create sexy, animated, and 3D polaroids.",
+  description: "Create, animated, and 3D polaroids.",
 };
 
 export default function RootLayout({

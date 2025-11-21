@@ -246,7 +246,7 @@ export function DesktopSidebar() {
 
             {/* Sexy AI Edits */}
             <div className="pt-4 border-t border-white/10">
-              <h4 className="text-xs font-bold text-white/90 mb-3">Sexy AI Edits</h4>
+              <h4 className="text-xs font-bold text-white/90 mb-3">AI Edits</h4>
               <div className="grid grid-cols-2 gap-2 mb-3">
                 {require("@/constants/ai-presets").AI_EDIT_PRESETS.map((preset: any) => (
                   <button

@@ -16,7 +16,7 @@ export function LoadingOverlay() {
         <div className="text-center">
           <h3 className="text-white font-bold text-lg">Magic in Progress</h3>
           <p className="text-neutral-400 text-sm">
-            {isGeneratingCaption ? "Writing the perfect caption..." : "Applying sexy edits..."}
+            {isGeneratingCaption ? "Writing the perfect caption..." : "Applying edits..."}
           </p>
         </div>
       </div>

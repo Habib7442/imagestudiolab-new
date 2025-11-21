@@ -263,7 +263,7 @@ export function MobileControls() {
 
                   {/* Sexy AI Edits */}
                   <div className="pt-6 border-t border-white/10 space-y-4">
-                    <h4 className="text-xs font-bold text-white/90">Sexy AI Edits</h4>
+                    <h4 className="text-xs font-bold text-white/90">AI Edits</h4>
                     <div className="grid grid-cols-2 gap-2">
                       {require("@/constants/ai-presets").AI_EDIT_PRESETS.map((preset: any) => (
                         <button
