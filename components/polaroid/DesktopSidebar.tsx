@@ -28,16 +28,20 @@ export function DesktopSidebar() {
     }
 
     acceptedFiles.forEach(async (file) => {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(`File ${file.name} is too large. Please upload images under 5MB.`);
+      if (file.size > 50 * 1024 * 1024) { // 50MB limit for video
+        alert(`File ${file.name} is too large. Please upload files under 50MB.`);
         return;
       }
 
-      try {
-        const resizedImage = await resizeImage(file);
+      const isVideo = file.type.startsWith('video/');
+
+      if (isVideo) {
+        // Video handling
+        const videoUrl = URL.createObjectURL(file);
         addPolaroid({
           id: `polaroid-${Date.now()}-${Math.random()}`,
-          imageUrl: resizedImage,
+          imageUrl: videoUrl,
+          mediaType: 'video',
           caption: "",
           filter: "none",
           theme: "classic",
@@ -45,15 +49,44 @@ export function DesktopSidebar() {
           position: { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100 },
           scale: 0.5,
         });
-      } catch (error) {
-        console.error("Failed to process image:", error);
+        
+        // Force single mode for video
+        if (mode === 'storyboard') {
+             usePolaroidStore.getState().setMode('single');
+             alert("Switched to Single Mode for video support.");
+        }
+      } else {
+        // Image handling
+        if (file.size > 5 * 1024 * 1024) {
+             alert(`File ${file.name} is too large. Please upload images under 5MB.`);
+             return;
+        }
+        try {
+          const resizedImage = await resizeImage(file);
+          addPolaroid({
+            id: `polaroid-${Date.now()}-${Math.random()}`,
+            imageUrl: resizedImage,
+            mediaType: 'image',
+            caption: "",
+            filter: "none",
+            theme: "classic",
+            rotation: Math.random() * 10 - 5,
+            position: { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100 },
+            scale: 0.5,
+          });
+        } catch (error) {
+          console.error("Failed to process image:", error);
+        }
       }
     });
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { "image/*": [] },
+    accept: { 
+        "image/*": [],
+        "video/*": [] 
+    },
     multiple: mode === "storyboard",
   });
 
@@ -256,43 +289,53 @@ export function DesktopSidebar() {
 
             {/* Sexy AI Edits */}
             <div className="pt-4 border-t border-white/10">
-              <h4 className="text-xs font-bold text-white/90 mb-3">AI Edits</h4>
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                {require("@/constants/ai-presets").AI_EDIT_PRESETS.map((preset: any) => (
-                  <button
-                    key={preset.id}
-                    onClick={() => usePolaroidStore.getState().editPolaroidImage(selectedPolaroidData.id, preset.prompt)}
-                    className="text-[10px] py-2 px-2 bg-white/5 hover:bg-[var(--color-brand-red)]/20 border border-white/10 hover:border-[var(--color-brand-red)] rounded transition-colors text-left truncate"
-                  >
-                    {preset.name}
-                  </button>
-                ))}
-              </div>
-              
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Custom AI prompt..."
-                  className="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-xs text-white focus:border-[var(--color-brand-red)] outline-none pr-8"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      usePolaroidStore.getState().editPolaroidImage(selectedPolaroidData.id, e.currentTarget.value);
-                      e.currentTarget.value = "";
-                    }
-                  }}
-                />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <span className="text-[10px] text-neutral-500">↵</span>
+              {selectedPolaroidData.mediaType === 'video' ? (
+                <div className="text-center py-2">
+                  <h4 className="text-xs font-bold text-white/90 mb-2">Video Enhancements</h4>
+                  <p className="text-[10px] text-neutral-500">AI edits are not available for video.</p>
+                  <p className="text-[10px] text-neutral-500 mt-1">Try the new cinematic filters above! 👆</p>
                 </div>
-              </div>
+              ) : (
+                <>
+                  <h4 className="text-xs font-bold text-white/90 mb-3">AI Edits</h4>
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    {require("@/constants/ai-presets").AI_EDIT_PRESETS.map((preset: any) => (
+                      <button
+                        key={preset.id}
+                        onClick={() => usePolaroidStore.getState().editPolaroidImage(selectedPolaroidData.id, preset.prompt)}
+                        className="text-[10px] py-2 px-2 bg-white/5 hover:bg-[var(--color-brand-red)]/20 border border-white/10 hover:border-[var(--color-brand-red)] rounded transition-colors text-left truncate"
+                      >
+                        {preset.name}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Custom AI prompt..."
+                      className="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-xs text-white focus:border-[var(--color-brand-red)] outline-none pr-8"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          usePolaroidStore.getState().editPolaroidImage(selectedPolaroidData.id, e.currentTarget.value);
+                          e.currentTarget.value = "";
+                        }
+                      }}
+                    />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <span className="text-[10px] text-neutral-500">↵</span>
+                    </div>
+                  </div>
 
-              {selectedPolaroidData.originalImageUrl && selectedPolaroidData.originalImageUrl !== selectedPolaroidData.imageUrl && (
-                <button
-                  onClick={() => usePolaroidStore.getState().restorePolaroidImage(selectedPolaroidData.id)}
-                  className="w-full mt-3 py-2 px-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-[10px] text-neutral-400 hover:text-white transition-colors flex items-center justify-center gap-2"
-                >
-                  <span>↺</span> Restore Original Image
-                </button>
+                  {selectedPolaroidData.originalImageUrl && selectedPolaroidData.originalImageUrl !== selectedPolaroidData.imageUrl && (
+                    <button
+                      onClick={() => usePolaroidStore.getState().restorePolaroidImage(selectedPolaroidData.id)}
+                      className="w-full mt-3 py-2 px-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-[10px] text-neutral-400 hover:text-white transition-colors flex items-center justify-center gap-2"
+                    >
+                      <span>↺</span> Restore Original Image
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -327,7 +370,13 @@ export function DesktopSidebar() {
 
         {/* Templates Section */}
         <div className="border-t border-white/10 pt-6">
-          <TemplatesList />
+          {polaroids.some(p => p.mediaType === 'video') ? (
+            <div className="text-center py-4">
+               <p className="text-xs text-neutral-500">Templates are disabled for video polaroids.</p>
+            </div>
+          ) : (
+            <TemplatesList />
+          )}
         </div>
 
         {/* More controls will be added here via separate components */}

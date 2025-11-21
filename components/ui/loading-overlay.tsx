@@ -4,8 +4,8 @@ import { Loader2 } from "lucide-react";
 import { usePolaroidStore } from "@/store/use-polaroid-store";
 
 export function LoadingOverlay() {
-  const { isGeneratingCaption, isGeneratingEdit } = usePolaroidStore();
-  const isLoading = isGeneratingCaption || isGeneratingEdit;
+  const { isGeneratingCaption, isGeneratingEdit, isExporting } = usePolaroidStore();
+  const isLoading = isGeneratingCaption || isGeneratingEdit || isExporting;
 
   if (!isLoading) return null;
 
@@ -14,9 +14,15 @@ export function LoadingOverlay() {
       <div className="bg-[#111] border border-white/10 rounded-xl p-6 flex flex-col items-center gap-4 shadow-2xl">
         <Loader2 className="w-10 h-10 text-[var(--color-brand-red)] animate-spin" />
         <div className="text-center">
-          <h3 className="text-white font-bold text-lg">Magic in Progress</h3>
+          <h3 className="text-white font-bold text-lg">
+            {isExporting ? "Exporting..." : "Magic in Progress"}
+          </h3>
           <p className="text-neutral-400 text-sm">
-            {isGeneratingCaption ? "Writing the perfect caption..." : "Applying edits..."}
+            {isExporting 
+              ? "Creating your masterpiece. This may take a moment." 
+              : isGeneratingCaption 
+                ? "Writing the perfect caption..." 
+                : "Applying edits..."}
           </p>
         </div>
       </div>

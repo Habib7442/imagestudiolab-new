@@ -139,16 +139,32 @@ export function PolaroidCard({ polaroid, isSelected, onClick }: PolaroidCardProp
       }}
     >
       <div className="relative bg-black overflow-hidden rounded-sm" style={{ aspectRatio: "4/5" }}>
-        <img
-          src={polaroid.imageUrl}
-          alt="Polaroid"
-          className="w-full h-full object-cover"
-          style={{
-            filter: appliedFilter,
-            objectPosition: "center top",
-          }}
-          draggable={false}
-        />
+        {polaroid.mediaType === 'video' ? (
+          <video
+            src={polaroid.imageUrl}
+            className="w-full h-full object-cover"
+            style={{
+              filter: appliedFilter,
+              objectPosition: "center top",
+            }}
+            autoPlay
+            loop
+            muted
+            playsInline
+            draggable={false}
+          />
+        ) : (
+          <img
+            src={polaroid.imageUrl}
+            alt="Polaroid"
+            className="w-full h-full object-cover"
+            style={{
+              filter: appliedFilter,
+              objectPosition: "center top",
+            }}
+            draggable={false}
+          />
+        )}
       </div>
 
       <div

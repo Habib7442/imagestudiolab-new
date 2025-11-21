@@ -43,28 +43,45 @@ export default function PolaroidEditor() {
 
 
   const handleExport = async () => {
-    const canvas = document.getElementById("polaroid-canvas");
-    if (!canvas) return;
-
-    // Check if user is authenticated
-    const { data: { session } } = await supabase.auth.getSession();
+    usePolaroidStore.getState().setIsExporting(true);
     
-    if (!session) {
-      // Save current polaroid state to localStorage before redirecting
-      const currentState = {
-        polaroids: usePolaroidStore.getState().polaroids,
-        backgroundColor: usePolaroidStore.getState().backgroundColor,
-        mode: usePolaroidStore.getState().mode,
-      };
-      localStorage.setItem('polaroid-state-before-login', JSON.stringify(currentState));
-      
-      // Redirect to login with return URL
-      alert("Please sign in to download your creation. Your work will be saved!");
-      router.push('/login?returnTo=/polaroid');
-      return;
-    }
-
     try {
+      // Hide icons by deselecting
+      usePolaroidStore.getState().setSelectedPolaroid(null);
+      
+      // Allow a brief moment for the UI to update (hide icons)
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const canvas = document.getElementById("polaroid-canvas");
+      if (!canvas) throw new Error("Canvas not found");
+
+      // Check if user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // Save current polaroid state to localStorage before redirecting
+        const currentState = {
+          polaroids: usePolaroidStore.getState().polaroids,
+          backgroundColor: usePolaroidStore.getState().backgroundColor,
+          mode: usePolaroidStore.getState().mode,
+        };
+        localStorage.setItem('polaroid-state-before-login', JSON.stringify(currentState));
+        
+        // Redirect to login with return URL
+        alert("Please sign in to download your creation. Your work will be saved!");
+        router.push('/login?returnTo=/polaroid');
+        return;
+      }
+
+      // Check for video
+      const videoPolaroid = polaroids.find(p => p.mediaType === 'video');
+
+      if (videoPolaroid) {
+          const { exportVideo } = await import("@/lib/video-exporter");
+          await exportVideo(videoPolaroid);
+          return;
+      }
+
       const { toPng } = await import("html-to-image");
       const dataUrl = await toPng(canvas, { 
         cacheBust: true, 
@@ -77,7 +94,10 @@ export default function PolaroidEditor() {
       link.href = dataUrl;
       link.click();
     } catch (err) {
-      console.error("Failed to export image", err);
+      console.error("Failed to export", err);
+      alert("Failed to export. Please try again.");
+    } finally {
+      usePolaroidStore.getState().setIsExporting(false);
     }
   };
 
@@ -85,6 +105,8 @@ export default function PolaroidEditor() {
     await supabase.auth.signOut();
     router.push("/");
   };
+
+  const hasVideo = polaroids.some(p => p.mediaType === 'video');
 
   return (
     <div className="flex flex-col h-screen bg-[#050505] text-white overflow-hidden">
@@ -111,13 +133,15 @@ export default function PolaroidEditor() {
             Single
           </button>
           <button
-            onClick={() => setMode("storyboard")}
+            onClick={() => !hasVideo && setMode("storyboard")}
+            disabled={hasVideo}
             className={cn(
               "px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition-all",
               mode === "storyboard"
                 ? "bg-blue-600 text-white"
-                : "text-neutral-400 hover:text-white"
+                : hasVideo ? "text-neutral-600 cursor-not-allowed" : "text-neutral-400 hover:text-white"
             )}
+            title={hasVideo ? "Story mode disabled for video" : "Switch to Story mode"}
           >
             Story
           </button>

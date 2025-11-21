@@ -30,16 +30,19 @@ export function MobileControls() {
     }
 
     acceptedFiles.forEach(async (file) => {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(`File ${file.name} is too large. Please upload images under 5MB.`);
+      if (file.size > 50 * 1024 * 1024) {
+        alert(`File ${file.name} is too large. Please upload files under 50MB.`);
         return;
       }
 
-      try {
-        const resizedImage = await resizeImage(file);
-        addPolaroid({
+      const isVideo = file.type.startsWith('video/');
+
+      if (isVideo) {
+         const videoUrl = URL.createObjectURL(file);
+         addPolaroid({
           id: `polaroid-${Date.now()}-${Math.random()}`,
-          imageUrl: resizedImage,
+          imageUrl: videoUrl,
+          mediaType: 'video',
           caption: "",
           filter: "none",
           theme: "classic",
@@ -47,18 +50,47 @@ export function MobileControls() {
           position: { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100 },
           scale: 0.5,
         });
-      } catch (error) {
-        console.error("Failed to process image:", error);
+
+        if (mode === 'storyboard') {
+             usePolaroidStore.getState().setMode('single');
+             alert("Switched to Single Mode for video support.");
+        }
+      } else {
+        if (file.size > 5 * 1024 * 1024) {
+            alert(`File ${file.name} is too large. Please upload images under 5MB.`);
+            return;
+        }
+        try {
+            const resizedImage = await resizeImage(file);
+            addPolaroid({
+            id: `polaroid-${Date.now()}-${Math.random()}`,
+            imageUrl: resizedImage,
+            mediaType: 'image',
+            caption: "",
+            filter: "none",
+            theme: "classic",
+            rotation: Math.random() * 10 - 5,
+            position: { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100 },
+            scale: 0.5,
+            });
+        } catch (error) {
+            console.error("Failed to process image:", error);
+        }
       }
     });
   };
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    accept: { "image/*": [] },
+    accept: { 
+        "image/*": [],
+        "video/*": [] 
+    },
     multiple: mode === "storyboard",
     noClick: true, // We'll trigger it manually
   });
+
+  const hasVideo = polaroids.some(p => p.mediaType === 'video');
 
   return (
     <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0A0A0A] border-t border-white/10 px-4 py-3 z-50">
@@ -83,7 +115,17 @@ export function MobileControls() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-neutral-400 hover:text-white hover:bg-white/10"
+              className={cn(
+                  "text-neutral-400 hover:text-white hover:bg-white/10",
+                  hasVideo && "opacity-50 cursor-not-allowed"
+              )}
+              disabled={hasVideo}
+              onClick={(e) => {
+                  if (hasVideo) {
+                      e.preventDefault();
+                      alert("Templates are disabled when a video is present.");
+                  }
+              }}
             >
               <LayoutTemplate size={24} />
               <span className="sr-only">Templates</span>
@@ -274,45 +316,55 @@ export function MobileControls() {
 
                   {/* Sexy AI Edits */}
                   <div className="pt-6 border-t border-white/10 space-y-4">
-                    <h4 className="text-xs font-bold text-white/90">AI Edits</h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      {require("@/constants/ai-presets").AI_EDIT_PRESETS.map((preset: any) => (
-                        <button
-                          key={preset.id}
-                          onClick={() => usePolaroidStore.getState().editPolaroidImage(selectedPolaroid, preset.prompt)}
-                          className="text-[10px] py-2.5 px-2 bg-white/5 hover:bg-[var(--color-brand-red)]/20 border border-white/10 hover:border-[var(--color-brand-red)] rounded transition-colors text-left truncate"
-                        >
-                          {preset.name}
-                        </button>
-                      ))}
-                    </div>
-                    
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Custom AI prompt..."
-                        className="w-full bg-black/50 border border-white/10 rounded px-3 py-2.5 text-xs text-white focus:border-[var(--color-brand-red)] outline-none pr-8"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            usePolaroidStore.getState().editPolaroidImage(selectedPolaroid, e.currentTarget.value);
-                            e.currentTarget.value = "";
-                          }
-                        }}
-                      />
-                      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <span className="text-[10px] text-neutral-500">↵</span>
+                    {usePolaroidStore.getState().polaroids.find(p => p.id === selectedPolaroid)?.mediaType === 'video' ? (
+                      <div className="text-center py-2">
+                        <h4 className="text-xs font-bold text-white/90 mb-2">Video Enhancements</h4>
+                        <p className="text-[10px] text-neutral-500">AI edits are not available for video.</p>
+                        <p className="text-[10px] text-neutral-500 mt-1">Try the new cinematic filters above! 👆</p>
                       </div>
-                    </div>
+                    ) : (
+                      <>
+                        <h4 className="text-xs font-bold text-white/90">AI Edits</h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          {require("@/constants/ai-presets").AI_EDIT_PRESETS.map((preset: any) => (
+                            <button
+                              key={preset.id}
+                              onClick={() => usePolaroidStore.getState().editPolaroidImage(selectedPolaroid, preset.prompt)}
+                              className="text-[10px] py-2.5 px-2 bg-white/5 hover:bg-[var(--color-brand-red)]/20 border border-white/10 hover:border-[var(--color-brand-red)] rounded transition-colors text-left truncate"
+                            >
+                              {preset.name}
+                            </button>
+                          ))}
+                        </div>
+                        
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Custom AI prompt..."
+                            className="w-full bg-black/50 border border-white/10 rounded px-3 py-2.5 text-xs text-white focus:border-[var(--color-brand-red)] outline-none pr-8"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                usePolaroidStore.getState().editPolaroidImage(selectedPolaroid, e.currentTarget.value);
+                                e.currentTarget.value = "";
+                              }
+                            }}
+                          />
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <span className="text-[10px] text-neutral-500">↵</span>
+                          </div>
+                        </div>
 
-                    {usePolaroidStore.getState().polaroids.find(p => p.id === selectedPolaroid)?.originalImageUrl && 
-                     usePolaroidStore.getState().polaroids.find(p => p.id === selectedPolaroid)?.originalImageUrl !== 
-                     usePolaroidStore.getState().polaroids.find(p => p.id === selectedPolaroid)?.imageUrl && (
-                      <button
-                        onClick={() => usePolaroidStore.getState().restorePolaroidImage(selectedPolaroid)}
-                        className="w-full py-2.5 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-xs text-neutral-400 hover:text-white transition-colors flex items-center justify-center gap-2"
-                      >
-                        <span>↺</span> Restore Original Image
-                      </button>
+                        {usePolaroidStore.getState().polaroids.find(p => p.id === selectedPolaroid)?.originalImageUrl && 
+                         usePolaroidStore.getState().polaroids.find(p => p.id === selectedPolaroid)?.originalImageUrl !== 
+                         usePolaroidStore.getState().polaroids.find(p => p.id === selectedPolaroid)?.imageUrl && (
+                          <button
+                            onClick={() => usePolaroidStore.getState().restorePolaroidImage(selectedPolaroid)}
+                            className="w-full py-2.5 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-xs text-neutral-400 hover:text-white transition-colors flex items-center justify-center gap-2"
+                          >
+                            <span>↺</span> Restore Original Image
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

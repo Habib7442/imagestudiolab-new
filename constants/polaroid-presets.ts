@@ -8,6 +8,9 @@ export const FILTERS = {
   dreamy: { name: "Dreamy", filter: "brightness(1.1) saturate(0.8) blur(0.5px)" },
   noir: { name: "Film Noir", filter: "grayscale(1) contrast(1.3)" },
   neon: { name: "Neon Nights", filter: "saturate(2) contrast(1.2) hue-rotate(20deg)" },
+  cinematic: { name: "Cinematic", filter: "contrast(1.1) brightness(1.1) saturate(1.3) sepia(0.2)" },
+  "8mm": { name: "8mm Film", filter: "sepia(0.4) contrast(1.2) brightness(0.9) blur(0.5px)" },
+  fade: { name: "Faded", filter: "opacity(0.8) contrast(0.9) brightness(1.1)" },
 };
 
 export const THEMES = {

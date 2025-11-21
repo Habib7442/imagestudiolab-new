@@ -5,6 +5,7 @@ import { TEMPLATES } from "@/constants/templates";
 export interface Polaroid {
   id: string;
   imageUrl: string;
+  mediaType: 'image' | 'video';
   caption: string;
   filter: keyof typeof FILTERS;
   theme: keyof typeof THEMES;
@@ -13,6 +14,7 @@ export interface Polaroid {
   customFilter?: string;
   scale?: number;
   originalImageUrl?: string;
+  date?: string;
 }
 
 interface PolaroidStore {
@@ -24,6 +26,7 @@ interface PolaroidStore {
   exportSize: number;
   isGeneratingCaption: boolean;
   isGeneratingEdit: boolean;
+  isExporting: boolean;
 
   // Actions
   addPolaroid: (polaroid: Polaroid) => void;
@@ -35,6 +38,7 @@ interface PolaroidStore {
   setExportSize: (size: number) => void;
   setIsGeneratingCaption: (value: boolean) => void;
   setIsGeneratingEdit: (value: boolean) => void;
+  setIsExporting: (value: boolean) => void;
   clearPolaroids: () => void;
   applyTemplate: (templateId: string) => void;
   generateAIForPolaroid: (id: string) => Promise<void>;
@@ -51,6 +55,7 @@ export const usePolaroidStore = create<PolaroidStore>((set, get) => ({
   exportSize: 0,
   isGeneratingCaption: false,
   isGeneratingEdit: false,
+  isExporting: false,
 
   // Actions
   addPolaroid: (polaroid) =>
@@ -85,6 +90,8 @@ export const usePolaroidStore = create<PolaroidStore>((set, get) => ({
   setIsGeneratingCaption: (value) => set({ isGeneratingCaption: value }),
 
   setIsGeneratingEdit: (value) => set({ isGeneratingEdit: value }),
+
+  setIsExporting: (value: boolean) => set({ isExporting: value }),
 
   clearPolaroids: () => set({ polaroids: [], selectedPolaroid: null }),
 
