@@ -1,9 +1,9 @@
 
 export const AI_EDIT_PRESETS = [
   {
-    id: "bold-lips",
-    name: "Bold Lips Pop",
-    prompt: "Amplify lip color to vibrant neon or deep wine shades while keeping everything else muted, creating a striking focal point.",
+    id: "dreamy-bokeh",
+    name: "Dreamy Bokeh",
+    prompt: "Soft focus with beautiful circular bokeh lights in the background, creating a dreamy, ethereal atmosphere with gentle blur and warm glowing orbs.",
   },
   {
     id: "comic-hero",

@@ -4,16 +4,44 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
+import { LogOut } from "lucide-react";
 
 export default function Navbar() {
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
   });
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsLoggedIn(!!session);
+    };
+    
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+  };
 
   return (
     <motion.nav 
@@ -55,11 +83,22 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost" asChild className="text-neutral-400 hover:text-white hover:bg-white/5">
-            <Link href="/login">
-              Sign in
-            </Link>
-          </Button>
+          {isLoggedIn ? (
+            <Button 
+              variant="ghost" 
+              onClick={handleSignOut}
+              className="text-neutral-400 hover:text-white hover:bg-white/5 flex items-center gap-2"
+            >
+              <LogOut size={16} />
+              Sign Out
+            </Button>
+          ) : (
+            <Button variant="ghost" asChild className="text-neutral-400 hover:text-white hover:bg-white/5">
+              <Link href="/login">
+                Sign in
+              </Link>
+            </Button>
+          )}
           <Button asChild className="bg-[var(--color-brand-red)] hover:bg-red-600 text-white shadow-[0_0_15px_rgba(255,51,51,0.3)] hover:shadow-[0_0_25px_rgba(255,51,51,0.5)] border-none">
             <Link href="/polaroid">
               Get Started

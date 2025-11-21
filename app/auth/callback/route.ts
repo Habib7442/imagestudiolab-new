@@ -5,6 +5,7 @@ import type { NextRequest } from 'next/server';
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
+  const returnTo = requestUrl.searchParams.get('returnTo');
   const origin = requestUrl.origin;
 
   if (code) {
@@ -13,5 +14,5 @@ export async function GET(request: NextRequest) {
   }
 
   // URL to redirect to after sign in process completes
-  return NextResponse.redirect(`${origin}/`);
+  return NextResponse.redirect(`${origin}${returnTo || '/'}`);
 }

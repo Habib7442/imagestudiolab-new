@@ -5,6 +5,7 @@ import { Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePolaroidStore } from "@/store/use-polaroid-store";
 import { THEMES, FILTERS } from "@/constants/polaroid-presets";
+import { useRef, useEffect } from "react";
 
 import { Polaroid } from "@/store/use-polaroid-store";
 
@@ -19,9 +20,80 @@ export function PolaroidCard({ polaroid, isSelected, onClick }: PolaroidCardProp
   const theme = THEMES[polaroid.theme];
   const filter = FILTERS[polaroid.filter];
   const appliedFilter = polaroid.customFilter || filter.filter;
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!cardRef.current || !isSelected) return;
+
+    let initialDistance = 0;
+    let initialScale = polaroid.scale || 1;
+    let initialRotation = polaroid.rotation;
+    let initialAngle = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        
+        // Calculate initial distance for pinch
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        initialDistance = Math.hypot(
+          touch2.clientX - touch1.clientX,
+          touch2.clientY - touch1.clientY
+        );
+        initialScale = polaroid.scale || 1;
+        
+        // Calculate initial angle for rotation
+        initialAngle = Math.atan2(
+          touch2.clientY - touch1.clientY,
+          touch2.clientX - touch1.clientX
+        ) * (180 / Math.PI);
+        initialRotation = polaroid.rotation;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        
+        // Pinch to zoom
+        const currentDistance = Math.hypot(
+          touch2.clientX - touch1.clientX,
+          touch2.clientY - touch1.clientY
+        );
+        const scale = (currentDistance / initialDistance) * initialScale;
+        const clampedScale = Math.max(0.5, Math.min(2, scale));
+        
+        // Two-finger rotation
+        const currentAngle = Math.atan2(
+          touch2.clientY - touch1.clientY,
+          touch2.clientX - touch1.clientX
+        ) * (180 / Math.PI);
+        const rotation = initialRotation + (currentAngle - initialAngle);
+        
+        updatePolaroid(polaroid.id, {
+          scale: clampedScale,
+          rotation: rotation,
+        });
+      }
+    };
+
+    const element = cardRef.current;
+    element.addEventListener('touchstart', handleTouchStart, { passive: false });
+    element.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    return () => {
+      element.removeEventListener('touchstart', handleTouchStart);
+      element.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [isSelected, polaroid.id, polaroid.scale, polaroid.rotation, updatePolaroid]);
 
   return (
     <motion.div
+      ref={cardRef}
       id={`polaroid-${polaroid.id}`}
       drag
       dragMomentum={false}

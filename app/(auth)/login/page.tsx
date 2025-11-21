@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { login, signup, signInWithGoogle } from "../actions";
 
@@ -19,9 +20,13 @@ const DotPattern = () => (
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get('returnTo') || '/';
 
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true);
+    // Add returnTo to formData
+    formData.append('returnTo', returnTo);
     try {
       if (isLogin) {
         await login(formData);
