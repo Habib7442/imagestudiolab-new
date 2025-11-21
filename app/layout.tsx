@@ -23,8 +23,67 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "ImageStudioLab - PolaroidX",
-  description: "Create, animated, and 3D polaroids.",
+  metadataBase: new URL("https://imagestudiolab.com"),
+  title: {
+    default: "PolaroidX - AI Aesthetic Video & Photo Creator",
+    template: "%s | PolaroidX by ImageStudioLab",
+  },
+  description: "Create stunning animated video polaroids, aesthetic photo stories, and 3D visuals. Features AI-powered editing, cinematic filters (8mm, VHS), and seamless export for Instagram, TikTok, and Pinterest.",
+  keywords: [
+    "polaroid creator", 
+    "video polaroid", 
+    "aesthetic photo editor", 
+    "AI image generator", 
+    "cinematic filters", 
+    "instagram story maker", 
+    "retro photo effects", 
+    "8mm filter", 
+    "VHS effect", 
+    "ImageStudioLab"
+  ],
+  authors: [{ name: "ImageStudioLab Team" }],
+  creator: "ImageStudioLab",
+  publisher: "ImageStudioLab",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://imagestudiolab.com",
+    title: "PolaroidX - Create Aesthetic Video Polaroids",
+    description: "Transform your memories into cinematic masterpieces. The only polaroid creator with video support, AI magic, and premium aesthetic filters.",
+    siteName: "ImageStudioLab",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "PolaroidX Aesthetic Creator Preview",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PolaroidX - AI Video & Photo Creator",
+    description: "Create viral aesthetic content with PolaroidX. Video support, AI edits, and cinematic vibes.",
+    images: ["/og-image.jpg"],
+    creator: "@imagestudiolab",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
