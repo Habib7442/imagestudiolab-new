@@ -11,4 +11,4 @@ export const createGeminiClient = () => {
   return new GoogleGenAI({ apiKey });
 };
 
-export const GEMINI_MODEL_NAME = "gemini-2.5-flash-image";
+export const GEMINI_MODEL_NAME = "gemini-3-pro-image-preview";

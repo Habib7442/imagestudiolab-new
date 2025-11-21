@@ -103,3 +103,64 @@ export async function generateImageEdit(imageBase64: string, prompt: string) {
     throw error;
   }
 }
+
+export async function generateThumbnail(
+  imageBase64: string, 
+  prompt: string, 
+  aspectRatio: string = "16:9",
+  referenceImageBase64?: string
+) {
+  try {
+    const base64Data = imageBase64.split(",")[1] || imageBase64;
+    
+    const parts: any[] = [
+      { text: prompt },
+      {
+        inlineData: {
+          mimeType: "image/jpeg",
+          data: base64Data,
+        },
+      },
+    ];
+
+    if (referenceImageBase64) {
+      const referenceData = referenceImageBase64.split(",")[1] || referenceImageBase64;
+      parts.push({
+        inlineData: {
+          mimeType: "image/jpeg",
+          data: referenceData,
+        },
+      });
+      parts[0].text += " Use the second image as a style reference.";
+    }
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3-pro-image-preview",
+      contents: [
+        {
+          parts: parts,
+        },
+      ],
+      config: {
+        responseModalities: ["IMAGE"],
+        // @ts-ignore - Types might not be updated yet
+        imageConfig: {
+          aspectRatio: aspectRatio,
+        }
+      } as any
+    });
+
+    if (response.candidates && response.candidates[0]?.content?.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData && part.inlineData.data) {
+          return `data:image/png;base64,${part.inlineData.data}`;
+        }
+      }
+    }
+    
+    throw new Error("No image data in response");
+  } catch (error) {
+    console.error("Thumbnail Generation Error:", error);
+    throw error;
+  }
+}

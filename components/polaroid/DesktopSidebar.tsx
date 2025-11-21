@@ -3,7 +3,7 @@
 import { useDropzone } from "react-dropzone";
 import { Upload, ImageIcon } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn, resizeImage } from "@/lib/utils";
 import { usePolaroidStore } from "@/store/use-polaroid-store";
 import { TemplatesList } from "./TemplatesList";
 import { Slider } from "@/components/ui/slider";
@@ -27,23 +27,27 @@ export function DesktopSidebar() {
       return;
     }
 
-    acceptedFiles.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === "string") {
-          addPolaroid({
-            id: `polaroid-${Date.now()}-${Math.random()}`,
-            imageUrl: reader.result,
-            caption: "",
-            filter: "none",
-            theme: "classic",
-            rotation: Math.random() * 10 - 5,
-            position: { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100 },
-            scale: 0.5,
-          });
-        }
-      };
-      reader.readAsDataURL(file);
+    acceptedFiles.forEach(async (file) => {
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`File ${file.name} is too large. Please upload images under 5MB.`);
+        return;
+      }
+
+      try {
+        const resizedImage = await resizeImage(file);
+        addPolaroid({
+          id: `polaroid-${Date.now()}-${Math.random()}`,
+          imageUrl: resizedImage,
+          caption: "",
+          filter: "none",
+          theme: "classic",
+          rotation: Math.random() * 10 - 5,
+          position: { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100 },
+          scale: 0.5,
+        });
+      } catch (error) {
+        console.error("Failed to process image:", error);
+      }
     });
   };
 
