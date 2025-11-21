@@ -80,16 +80,13 @@ export default function Navbar({ actionButton }: NavbarProps) {
         
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-          {["Features", "Pricing", "Docs"].map((item) => (
-            <Link 
-              key={item} 
-              href="#" 
-              className="text-neutral-400 hover:text-white transition-colors relative group"
-            >
-              {item}
-              <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[var(--color-brand-red)] transition-all duration-300 group-hover:w-full" />
-            </Link>
-          ))}
+          <Link 
+            href="/testimonials" 
+            className="text-neutral-400 hover:text-white transition-colors relative group"
+          >
+            Testimonials
+            <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[var(--color-brand-red)] transition-all duration-300 group-hover:w-full" />
+          </Link>
         </div>
 
         {/* Desktop Auth Buttons */}
@@ -144,16 +141,13 @@ export default function Navbar({ actionButton }: NavbarProps) {
           className="md:hidden absolute top-full left-0 right-0 bg-[#050505]/95 backdrop-blur-md border-b border-white/10 shadow-lg"
         >
           <div className="px-4 py-6 space-y-4">
-            {["Features", "Pricing", "Docs"].map((item) => (
-              <Link
-                key={item}
-                href="#"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block text-neutral-400 hover:text-white transition-colors py-2"
-              >
-                {item}
-              </Link>
-            ))}
+            <Link
+              href="/testimonials"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block text-neutral-400 hover:text-white transition-colors py-2"
+            >
+              Testimonials
+            </Link>
             
             <div className="pt-4 border-t border-white/10 space-y-3">
               {isLoggedIn ? (
