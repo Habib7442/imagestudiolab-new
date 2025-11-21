@@ -18,7 +18,11 @@ export async function login(formData: FormData) {
 
   if (error) {
     console.error('Login error:', error.message);
-    redirect('/login?error=Invalid credentials');
+    let errorMsg = 'Invalid email or password. Please try again.';
+    if (error.message.includes('Email not confirmed')) {
+      errorMsg = 'Please verify your email address before signing in.';
+    }
+    redirect(`/login?error=${encodeURIComponent(errorMsg)}${returnTo ? `&returnTo=${returnTo}` : ''}`);
   }
 
   revalidatePath('/', 'layout');
@@ -42,11 +46,15 @@ export async function signup(formData: FormData) {
 
   if (error) {
     console.error('Signup error:', error.message);
-    redirect('/login?error=Could not create account');
+    let errorMsg = 'Could not create account. Please try again.';
+    if (error.message.includes('already registered')) {
+      errorMsg = 'This email is already registered. Please sign in instead.';
+    }
+    redirect(`/login?error=${encodeURIComponent(errorMsg)}${returnTo ? `&returnTo=${returnTo}` : ''}`);
   }
 
   revalidatePath('/', 'layout');
-  redirect('/login?message=Check your email to confirm your account');
+  redirect(`/login?message=${encodeURIComponent('Success! Check your email to verify your account before signing in.')}`);
 }
 
 export async function signInWithGoogle() {

@@ -30,15 +30,15 @@ export const TEMPLATES: Template[] = [
     ],
   },
   {
-    id: "film-strip-3",
-    name: "Film Strip",
-    description: "Cinematic vertical sequence",
-    thumbnail: "/templates/film.png",
+    id: "gallery-wall-3",
+    name: "Gallery Wall",
+    description: "Artistic spread of memories",
+    thumbnail: "/templates/film.png", // Keeping same thumbnail for now or use a generic one
     minImages: 3,
     slots: [
-      { x: 0, y: -250, rotation: 0, scale: 0.9, zIndex: 1 },
-      { x: 0, y: 0, rotation: 0, scale: 0.9, zIndex: 2 },
-      { x: 0, y: 250, rotation: 0, scale: 0.9, zIndex: 3 },
+      { x: -120, y: -100, rotation: -3, scale: 0.9, zIndex: 1 },
+      { x: 120, y: 0, rotation: 3, scale: 0.9, zIndex: 2 },
+      { x: -120, y: 100, rotation: -2, scale: 0.9, zIndex: 3 },
     ],
   },
   {
@@ -69,14 +69,15 @@ export const TEMPLATES: Template[] = [
     ],
   },
   {
-    id: "duo-overlap",
-    name: "Besties",
-    description: "Close overlap for duos",
-    thumbnail: "/templates/duo.png",
-    minImages: 2,
+    id: "fan-stack",
+    name: "Fan Stack",
+    description: "Elegant fanned cards",
+    thumbnail: "/templates/duo.png", // Keep same thumbnail or update if available
+    minImages: 3,
     slots: [
-      { x: -60, y: -20, rotation: -5, scale: 1.2, zIndex: 1 },
-      { x: 60, y: 20, rotation: 5, scale: 1.2, zIndex: 2 },
+      { x: -100, y: 20, rotation: -15, scale: 0.9, zIndex: 1 },
+      { x: 0, y: -20, rotation: 0, scale: 0.9, zIndex: 2 },
+      { x: 100, y: 20, rotation: 15, scale: 0.9, zIndex: 3 },
     ],
   },
 ];

@@ -99,7 +99,7 @@ export const usePolaroidStore = create<PolaroidStore>((set, get) => ({
           ...polaroid,
           position: { x: slot.x, y: slot.y },
           rotation: slot.rotation,
-          scale: slot.scale,
+          scale: 0.5, // Force scale to 50% for better performance and consistency
         };
       });
       return {

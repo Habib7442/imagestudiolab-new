@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, Suspense, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { login, signup, signInWithGoogle } from "../actions";
+import { CheckCircle2, XCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 const DotPattern = () => (
   <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" 
@@ -20,8 +21,11 @@ const DotPattern = () => (
 function LoginForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const searchParams = useSearchParams();
   const returnTo = searchParams.get('returnTo') || '/';
+  const errorMessage = searchParams.get('error');
+  const successMessage = searchParams.get('message');
 
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true);
@@ -73,6 +77,36 @@ function LoginForm() {
             {isLogin ? "Welcome back" : "Create your account"}
           </p>
         </motion.div>
+
+        {/* Success Message */}
+        {successMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 p-4 bg-green-500/10 border border-green-500/30 rounded-xl flex items-start gap-3"
+          >
+            <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm text-green-400 font-medium">Success!</p>
+              <p className="text-xs text-green-300/80 mt-1">{successMessage}</p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Error Message */}
+        {errorMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3"
+          >
+            <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm text-red-400 font-medium">Error</p>
+              <p className="text-xs text-red-300/80 mt-1">{errorMessage}</p>
+            </div>
+          </motion.div>
+        )}
 
         {/* Auth Form */}
         <motion.div
@@ -150,14 +184,23 @@ function LoginForm() {
                 <label htmlFor="password" className="text-sm font-medium text-neutral-400">
                   Password
                 </label>
-                <input 
-                  id="password" 
-                  name="password" 
-                  type="password" 
-                  required 
-                  placeholder="••••••••"
-                  className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-neutral-600 focus:outline-none focus:border-[var(--color-brand-red)]/50 focus:ring-2 focus:ring-[var(--color-brand-red)]/20 transition-all"
-                />
+                <div className="relative">
+                  <input 
+                    id="password" 
+                    name="password" 
+                    type={showPassword ? "text" : "password"} 
+                    required 
+                    placeholder="••••••••"
+                    className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-neutral-600 focus:outline-none focus:border-[var(--color-brand-red)]/50 focus:ring-2 focus:ring-[var(--color-brand-red)]/20 transition-all pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               {/* Submit Button */}

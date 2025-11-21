@@ -22,6 +22,11 @@ export function DesktopSidebar() {
   } = usePolaroidStore();
 
   const onDrop = (acceptedFiles: File[]) => {
+    if (mode === "storyboard" && polaroids.length + acceptedFiles.length > 5) {
+      alert("Maximum 5 images allowed for optimal performance.");
+      return;
+    }
+
     acceptedFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onload = () => {
@@ -34,6 +39,7 @@ export function DesktopSidebar() {
             theme: "classic",
             rotation: Math.random() * 10 - 5,
             position: { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100 },
+            scale: 0.5,
           });
         }
       };
