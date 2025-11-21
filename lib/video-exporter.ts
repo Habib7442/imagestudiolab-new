@@ -130,15 +130,35 @@ export const exportVideo = async (polaroid: Polaroid) => {
 
     // A. Draw Card Frame
     ctx.fillStyle = theme.frameColor;
-    // Add Shadow
-    ctx.shadowColor = "rgba(0,0,0,0.2)";
-    ctx.shadowBlur = 20;
-    ctx.shadowOffsetY = 10;
+    
+    // Parse and Apply Shadow from Theme
+    // Format: "0 4px 20px rgba(0,0,0,0.15)" -> x y blur color
+    // We need to handle the parsing carefully
+    const shadowParts = theme.shadow.match(/(-?\d+px|-?\d+)\s+(-?\d+px|-?\d+)\s+(-?\d+px|-?\d+)\s+(.+)/);
+    
+    if (shadowParts) {
+        const offsetX = parseFloat(shadowParts[1]);
+        const offsetY = parseFloat(shadowParts[2]);
+        const blur = parseFloat(shadowParts[3]);
+        const color = shadowParts[4];
+
+        ctx.shadowOffsetX = offsetX * BASE_SCALE;
+        ctx.shadowOffsetY = offsetY * BASE_SCALE;
+        ctx.shadowBlur = blur * BASE_SCALE;
+        ctx.shadowColor = color;
+    } else {
+        // Fallback if parsing fails
+        ctx.shadowColor = "rgba(0,0,0,0.2)";
+        ctx.shadowBlur = 20 * BASE_SCALE;
+        ctx.shadowOffsetY = 10 * BASE_SCALE;
+    }
+
     ctx.fillRect(drawX, drawY, UI_CARD_WIDTH, UI_CARD_HEIGHT);
     
-    // Reset Shadow
+    // Reset Shadow for subsequent drawings
     ctx.shadowColor = "transparent";
     ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
 
     // B. Draw Image Area Background (Black)
