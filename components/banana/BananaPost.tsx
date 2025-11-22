@@ -6,6 +6,7 @@ import { toggleBananaUpvote, deleteBananaPost } from "@/actions/banana-actions";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface BananaPostProps {
   post: any;
@@ -53,16 +54,18 @@ export function BananaPost({ post, currentUserId, hasUpvoted: initialHasUpvoted 
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
+    const shareUrl = `${window.location.origin}/nano-banana-wall/${post.id}`;
     try {
       if (navigator.share) {
         await navigator.share({
           title: 'Nano Banana Wall Art',
           text: `Check out this AI art by ${post.username}: ${post.prompt}`,
-          url: window.location.href,
+          url: shareUrl,
         });
       } else {
-        await navigator.clipboard.writeText(post.image_url);
-        alert("Image URL copied to clipboard!");
+        await navigator.clipboard.writeText(shareUrl);
+        alert("Link copied to clipboard!");
       }
     } catch (err) {
       console.error("Share failed", err);
@@ -71,6 +74,7 @@ export function BananaPost({ post, currentUserId, hasUpvoted: initialHasUpvoted 
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     if (!confirm("Are you sure you want to delete this post?")) return;
     try {
       await deleteBananaPost(post.id);
@@ -83,7 +87,8 @@ export function BananaPost({ post, currentUserId, hasUpvoted: initialHasUpvoted 
   const isOwner = currentUserId === post.user_id;
 
   return (
-    <div className="group relative bg-[#111] border border-white/10 rounded-xl overflow-hidden hover:border-yellow-400/50 transition-colors">
+    <Link href={`/nano-banana-wall/${post.id}`} className="block">
+      <div className="group relative bg-[#111] border border-white/10 rounded-xl overflow-hidden hover:border-yellow-400/50 transition-colors cursor-pointer">
       <div className="relative overflow-hidden">
         <img 
           src={post.image_url} 
@@ -92,26 +97,6 @@ export function BananaPost({ post, currentUserId, hasUpvoted: initialHasUpvoted 
           loading="lazy"
         />
         
-        {/* Overlay Actions */}
-        <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-           <button 
-             onClick={handleShare} 
-             className="p-2 bg-black/60 backdrop-blur-sm rounded-full text-white hover:bg-black/80 transition-colors border border-white/10"
-             title="Share"
-           >
-             <Share2 size={14} />
-           </button>
-           {isOwner && (
-             <button 
-               onClick={handleDelete} 
-               className="p-2 bg-red-500/80 backdrop-blur-sm rounded-full text-white hover:bg-red-600 transition-colors border border-white/10"
-               title="Delete"
-             >
-               <Trash2 size={14} />
-             </button>
-           )}
-        </div>
-
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 pointer-events-none">
           <p className="text-white text-sm line-clamp-2 font-medium">{post.prompt}</p>
           <p className="text-neutral-400 text-xs mt-1">by {post.username}</p>
@@ -127,6 +112,14 @@ export function BananaPost({ post, currentUserId, hasUpvoted: initialHasUpvoted 
         </div>
         
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-white/5 text-neutral-400 hover:bg-white/10 hover:text-white transition-all"
+            title="Share"
+          >
+            <Share2 size={14} />
+          </button>
+
           {isOwnPost && (
             <button
               onClick={handleDelete}
@@ -137,7 +130,11 @@ export function BananaPost({ post, currentUserId, hasUpvoted: initialHasUpvoted 
             </button>
           )}
           <button
-            onClick={handleUpvote}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleUpvote();
+            }}
             disabled={isVoting}
             className={cn(
               "flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium transition-all",
@@ -151,6 +148,7 @@ export function BananaPost({ post, currentUserId, hasUpvoted: initialHasUpvoted 
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </Link>
   );
 }

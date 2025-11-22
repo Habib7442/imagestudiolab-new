@@ -115,6 +115,19 @@ export async function getUserUpvotes() {
     return data?.map(v => v.post_id) || [];
 }
 
+export async function getBananaPostById(postId: string) {
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase
+    .from('banana_posts')
+    .select('*')
+    .eq('id', postId)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function deleteBananaPost(postId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
