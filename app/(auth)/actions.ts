@@ -57,13 +57,13 @@ export async function signup(formData: FormData) {
   redirect(`/login?message=${encodeURIComponent('Success! Check your email to verify your account before signing in.')}`);
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(returnTo?: string) {
   const supabase = await createClient();
   
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback${returnTo ? `?returnTo=${returnTo}` : ''}`,
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',

@@ -25,8 +25,8 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   metadataBase: new URL("https://imagestudiolab.com"),
   title: {
-    default: "PolaroidX - AI Aesthetic Video & Photo Creator",
-    template: "%s | PolaroidX by ImageStudioLab",
+    default: "ImageStudioLab - AI Aesthetic Video & Photo Creator",
+    template: "%s | ImageStudioLab",
   },
   description: "Create stunning animated video polaroids, aesthetic photo stories, and 3D visuals. Features AI-powered editing, cinematic filters (8mm, VHS), and seamless export for Instagram, TikTok, and Pinterest.",
   keywords: [

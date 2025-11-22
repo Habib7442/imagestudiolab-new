@@ -128,8 +128,7 @@ function LoginForm() {
                 type="button"
                 onClick={async () => {
                   setIsLoading(true);
-                  const formData = new FormData();
-                  await signInWithGoogle();
+                  await signInWithGoogle(returnTo);
                 }}
                 className="w-full bg-white hover:bg-neutral-100 text-black font-semibold py-6 rounded-xl border border-white/20 shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3"
               >

@@ -164,3 +164,36 @@ export async function generateThumbnail(
     throw error;
   }
 }
+
+export async function generateImageFromPrompt(prompt: string, aspectRatio: string = "1:1") {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-pro-image-preview",
+      contents: [
+        {
+          parts: [{ text: prompt }],
+        },
+      ],
+      config: {
+        responseModalities: ["IMAGE"],
+        // @ts-ignore
+        imageConfig: {
+          aspectRatio: aspectRatio,
+        }
+      } as any
+    });
+
+    if (response.candidates && response.candidates[0]?.content?.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData && part.inlineData.data) {
+          return `data:image/png;base64,${part.inlineData.data}`;
+        }
+      }
+    }
+    
+    throw new Error("No image data in response");
+  } catch (error) {
+    console.error("AI Image Generation Error:", error);
+    throw error;
+  }
+}

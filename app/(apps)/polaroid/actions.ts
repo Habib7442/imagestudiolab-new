@@ -32,7 +32,7 @@ The caption should be:
 Return ONLY the caption text, nothing else.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-3-pro-preview",
       contents: [
         {
           parts: [
@@ -78,7 +78,7 @@ Return a JSON object with these fields:
 Be specific and practical. Return ONLY valid JSON.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-3-pro-preview",
       contents: [
         {
           parts: [

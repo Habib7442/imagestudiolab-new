@@ -87,6 +87,15 @@ export default function Navbar({ actionButton }: NavbarProps) {
             Testimonials
             <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[var(--color-brand-red)] transition-all duration-300 group-hover:w-full" />
           </Link>
+          <div className="relative group">
+            <Link 
+              href="/nano-banana-wall" 
+              className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1"
+            >
+              <span className="text-yellow-400">🍌</span> Nano Banana Wall
+            </Link>
+            <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-yellow-400 transition-all duration-300 group-hover:w-full" />
+          </div>
         </div>
 
         {/* Desktop Auth Buttons */}
@@ -147,6 +156,13 @@ export default function Navbar({ actionButton }: NavbarProps) {
               className="block text-neutral-400 hover:text-white transition-colors py-2"
             >
               Testimonials
+            </Link>
+            <Link
+              href="/nano-banana-wall"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block text-neutral-400 hover:text-white transition-colors py-2 flex items-center gap-2"
+            >
+              <span className="text-yellow-400">🍌</span> Nano Banana Wall
             </Link>
             
             <div className="pt-4 border-t border-white/10 space-y-3">
