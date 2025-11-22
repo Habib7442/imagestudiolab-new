@@ -1,7 +1,7 @@
 "use client";
 
 import { useDropzone } from "react-dropzone";
-import { Upload, ImageIcon } from "lucide-react";
+import { Upload, ImageIcon, Type } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn, resizeImage } from "@/lib/utils";
 import { usePolaroidStore } from "@/store/use-polaroid-store";
@@ -19,6 +19,11 @@ export function DesktopSidebar() {
     addPolaroid,
     generateAIForPolaroid,
     updatePolaroid,
+    addTextElement,
+    textElements,
+    selectedTextElement,
+    updateTextElement,
+    removeTextElement
   } = usePolaroidStore();
 
   const onDrop = (acceptedFiles: File[]) => {
@@ -89,6 +94,8 @@ export function DesktopSidebar() {
     },
     multiple: mode === "storyboard",
   });
+  
+  const selectedTextData = textElements.find((t) => t.id === selectedTextElement);
 
   const selectedPolaroidData = polaroids.find((p) => p.id === selectedPolaroid);
 
@@ -338,6 +345,102 @@ export function DesktopSidebar() {
                 </>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Canvas Elements */}
+        <div className="border-t border-white/10 pt-6 space-y-4">
+           <h3 className="text-sm font-bold text-white/90">Add Elements</h3>
+           <button
+             onClick={() => addTextElement({
+               id: `text-${Date.now()}`,
+               text: "Double click to edit",
+               x: 0,
+               y: 0,
+               fontSize: 24,
+               color: "#000000",
+               fontFamily: "Caveat",
+               rotation: 0,
+               fontWeight: "normal"
+             })}
+             className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center gap-2 text-sm text-white transition-colors"
+           >
+             <Type size={16} />
+             Add Text
+           </button>
+        </div>
+
+        {/* Selected Text Controls */}
+        {selectedTextData && (
+          <div className="border-t border-white/10 pt-6 space-y-4">
+             <div className="flex justify-between items-center">
+               <h3 className="text-sm font-bold text-white/90">Edit Text</h3>
+               <button 
+                 onClick={() => removeTextElement(selectedTextData.id)}
+                 className="text-xs text-red-500 hover:text-red-400"
+               >
+                 Delete
+               </button>
+             </div>
+             
+             <textarea
+               value={selectedTextData.text}
+               onChange={(e) => updateTextElement(selectedTextData.id, { text: e.target.value })}
+               className="w-full bg-white/5 border border-white/10 rounded-md text-sm text-white p-2 outline-none focus:border-[var(--color-brand-red)] resize-none"
+               rows={2}
+               placeholder="Enter text..."
+             />
+             
+             <div className="grid grid-cols-2 gap-2">
+               <div>
+                 <label className="text-xs text-neutral-400 mb-1 block">Size</label>
+                 <input
+                   type="number"
+                   value={selectedTextData.fontSize}
+                   onChange={(e) => updateTextElement(selectedTextData.id, { fontSize: parseInt(e.target.value) })}
+                   className="w-full bg-white/5 border border-white/10 rounded-md text-xs text-white p-2 outline-none focus:border-[var(--color-brand-red)]"
+                 />
+               </div>
+               <div>
+                 <label className="text-xs text-neutral-400 mb-1 block">Color</label>
+                 <div className="flex items-center gap-2 h-[34px] bg-white/5 border border-white/10 rounded-md px-2">
+                   <input
+                     type="color"
+                     value={selectedTextData.color}
+                     onChange={(e) => updateTextElement(selectedTextData.id, { color: e.target.value })}
+                     className="w-6 h-6 rounded cursor-pointer border-0 p-0 bg-transparent"
+                   />
+                   <span className="text-xs text-neutral-400 uppercase">{selectedTextData.color}</span>
+                 </div>
+               </div>
+             </div>
+             
+             <div>
+               <label className="text-xs text-neutral-400 mb-1 block">Font</label>
+               <select
+                 value={selectedTextData.fontFamily}
+                 onChange={(e) => updateTextElement(selectedTextData.id, { fontFamily: e.target.value })}
+                 className="w-full bg-white/5 border border-white/10 rounded-md text-xs text-white p-2 outline-none focus:border-[var(--color-brand-red)]"
+               >
+                 <option value="Caveat">Handwritten (Caveat)</option>
+                 <option value="Inter">Modern (Inter)</option>
+                 <option value="Playfair Display">Elegant (Playfair)</option>
+                 <option value="Courier Prime">Typewriter (Courier)</option>
+               </select>
+             </div>
+
+             <div>
+                <label className="text-xs text-neutral-400 mb-1 block">Rotation</label>
+                <Slider
+                  defaultValue={[0]}
+                  value={[selectedTextData.rotation]}
+                  min={-180}
+                  max={180}
+                  step={1}
+                  onValueChange={(value) => updateTextElement(selectedTextData.id, { rotation: value[0] })}
+                  className="py-2"
+                />
+             </div>
           </div>
         )}
 

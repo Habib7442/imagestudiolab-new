@@ -6,10 +6,21 @@ import { Image as ImageIcon } from "lucide-react";
 import { usePolaroidStore } from "@/store/use-polaroid-store";
 import { EXPORT_SIZES } from "@/constants/polaroid-presets";
 import { PolaroidCard } from "./PolaroidCard";
+import { TextElementComponent } from "./TextElementComponent";
 
 export function PolaroidCanvas() {
   const canvasRef = useRef<HTMLDivElement>(null);
-  const { polaroids, mode, exportSize, backgroundColor, selectedPolaroid, setSelectedPolaroid } = usePolaroidStore();
+  const { 
+    polaroids, 
+    mode, 
+    exportSize, 
+    backgroundColor, 
+    selectedPolaroid, 
+    setSelectedPolaroid,
+    textElements,
+    selectedTextElement,
+    setSelectedTextElement
+  } = usePolaroidStore();
   
   const currentSize = mode === "single" ? EXPORT_SIZES.single[exportSize] : EXPORT_SIZES.storyboard[exportSize];
 
@@ -56,6 +67,14 @@ export function PolaroidCanvas() {
                 polaroid={polaroid}
                 isSelected={selectedPolaroid === polaroid.id}
                 onClick={() => setSelectedPolaroid(polaroid.id)}
+              />
+            ))}
+            {textElements.map((element) => (
+              <TextElementComponent
+                key={element.id}
+                element={element}
+                isSelected={selectedTextElement === element.id}
+                onClick={() => setSelectedTextElement(element.id)}
               />
             ))}
           </AnimatePresence>

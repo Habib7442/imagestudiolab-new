@@ -2,25 +2,24 @@ import { create } from "zustand";
 import { FILTERS, THEMES } from "@/constants/polaroid-presets";
 import { TEMPLATES } from "@/constants/templates";
 
-export interface Polaroid {
+export interface TextElement {
   id: string;
-  imageUrl: string;
-  mediaType: 'image' | 'video';
-  caption: string;
-  filter: keyof typeof FILTERS;
-  theme: keyof typeof THEMES;
+  text: string;
+  x: number;
+  y: number;
+  fontSize: number;
+  color: string;
+  fontFamily: string;
   rotation: number;
-  position: { x: number; y: number };
-  customFilter?: string;
-  scale?: number;
-  originalImageUrl?: string;
-  date?: string;
+  fontWeight: string;
 }
 
 interface PolaroidStore {
   // State
   polaroids: Polaroid[];
+  textElements: TextElement[];
   selectedPolaroid: string | null;
+  selectedTextElement: string | null;
   mode: "single" | "storyboard";
   backgroundColor: string;
   exportSize: number;
@@ -33,6 +32,12 @@ interface PolaroidStore {
   updatePolaroid: (id: string, updates: Partial<Polaroid>) => void;
   removePolaroid: (id: string) => void;
   setSelectedPolaroid: (id: string | null) => void;
+  
+  addTextElement: (text: TextElement) => void;
+  updateTextElement: (id: string, updates: Partial<TextElement>) => void;
+  removeTextElement: (id: string) => void;
+  setSelectedTextElement: (id: string | null) => void;
+
   setMode: (mode: "single" | "storyboard") => void;
   setBackgroundColor: (color: string) => void;
   setExportSize: (size: number) => void;
@@ -49,7 +54,9 @@ interface PolaroidStore {
 export const usePolaroidStore = create<PolaroidStore>((set, get) => ({
   // Initial State
   polaroids: [],
+  textElements: [],
   selectedPolaroid: null,
+  selectedTextElement: null,
   mode: "single",
   backgroundColor: "#E8DCC4",
   exportSize: 0,
@@ -64,6 +71,7 @@ export const usePolaroidStore = create<PolaroidStore>((set, get) => ({
         ? [{ ...polaroid, originalImageUrl: polaroid.imageUrl }] 
         : [...state.polaroids, { ...polaroid, originalImageUrl: polaroid.imageUrl }],
       selectedPolaroid: polaroid.id,
+      selectedTextElement: null,
     })),
 
   updatePolaroid: (id, updates) =>
@@ -79,7 +87,29 @@ export const usePolaroidStore = create<PolaroidStore>((set, get) => ({
       selectedPolaroid: state.selectedPolaroid === id ? null : state.selectedPolaroid,
     })),
 
-  setSelectedPolaroid: (id) => set({ selectedPolaroid: id }),
+  setSelectedPolaroid: (id) => set({ selectedPolaroid: id, selectedTextElement: null }),
+
+  addTextElement: (text) =>
+    set((state) => ({
+      textElements: [...state.textElements, text],
+      selectedTextElement: text.id,
+      selectedPolaroid: null,
+    })),
+
+  updateTextElement: (id, updates) =>
+    set((state) => ({
+      textElements: state.textElements.map((t) =>
+        t.id === id ? { ...t, ...updates } : t
+      ),
+    })),
+
+  removeTextElement: (id) =>
+    set((state) => ({
+      textElements: state.textElements.filter((t) => t.id !== id),
+      selectedTextElement: state.selectedTextElement === id ? null : state.selectedTextElement,
+    })),
+
+  setSelectedTextElement: (id) => set({ selectedTextElement: id, selectedPolaroid: null }),
 
   setMode: (mode) => set({ mode }),
 
@@ -93,7 +123,7 @@ export const usePolaroidStore = create<PolaroidStore>((set, get) => ({
 
   setIsExporting: (value: boolean) => set({ isExporting: value }),
 
-  clearPolaroids: () => set({ polaroids: [], selectedPolaroid: null }),
+  clearPolaroids: () => set({ polaroids: [], textElements: [], selectedPolaroid: null, selectedTextElement: null }),
 
   applyTemplate: (templateId) => {
     const template = TEMPLATES.find((t) => t.id === templateId);
