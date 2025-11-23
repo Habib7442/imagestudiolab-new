@@ -60,10 +60,15 @@ export async function signup(formData: FormData) {
 export async function signInWithGoogle(returnTo?: string) {
   const supabase = await createClient();
   
+  // Get the origin from headers for accurate redirect URL
+  const { headers } = await import('next/headers');
+  const headersList = await headers();
+  const origin = headersList.get('origin') || headersList.get('referer')?.split('/').slice(0, 3).join('/') || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback${returnTo ? `?returnTo=${returnTo}` : ''}`,
+      redirectTo: `${origin}/auth/callback${returnTo ? `?returnTo=${returnTo}` : ''}`,
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',
