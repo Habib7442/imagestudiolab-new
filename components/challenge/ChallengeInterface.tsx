@@ -128,7 +128,20 @@ export function ChallengeInterface({ challenge, initialEntries, userUpvotes }: C
 
     setIsSubmitting(true);
     try {
-      await submitChallengeEntry(challenge.id, title, prompt, finalCategory, generatedCover, generatedPages);
+      // Upload images client-side to avoid Vercel payload size limits
+      const { uploadImageToStorage } = await import("@/lib/upload-image");
+      
+      // Upload cover image
+      const coverUrl = await uploadImageToStorage(generatedCover, "cover");
+      
+      // Upload all pages
+      const pageUrls = await Promise.all(
+        generatedPages.map((page, i) => uploadImageToStorage(page, `page-${i + 1}`))
+      );
+
+      // Submit with URLs instead of base64
+      await submitChallengeEntry(challenge.id, title, prompt, finalCategory, coverUrl, pageUrls);
+      
       alert("Entry submitted successfully!");
       setActiveTab("gallery");
       // Reset form & draft

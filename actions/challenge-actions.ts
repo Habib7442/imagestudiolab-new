@@ -19,7 +19,7 @@ export async function getActiveChallenge() {
       return {
           id: data?.id || 'default-talent-challenge',
           title: 'Share Your Talent: Create a Mini-Book',
-          description: 'Share your expertise! Create a 6-8 page illustrated mini-book teaching something you know. From cooking to coding, fitness to finance.',
+          description: 'Share your expertise! Create a 6-8 page illustrated mini-book teaching something you know. From cooking to coding, fitness to finance.\n\n🏆 HOW TO WIN:\n1. Create and submit your mini-book\n2. Get at least 50 upvotes to qualify\n3. The qualified entry with the MOST upvotes wins $10 USD\n\n📋 RULES:\n• Minimum 50 upvotes required to enter the competition\n• Winner = Highest upvoted entry among all qualified submissions\n• Only ONE winner per challenge period\n• Be creative and share your unique knowledge!\n• Challenge ends on the deadline date',
           prize_amount: '$10 USD',
           end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'active'
@@ -140,30 +140,12 @@ export async function submitChallengeEntry(
     title: string, 
     prompt: string, 
     category: string,
-    coverImage: string,
-    bookPages: string[]
+    coverImageUrl: string,
+    bookPageUrls: string[]
 ) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
-
-  const uploadImage = async (base64: string, prefix: string) => {
-      if (base64.startsWith('http')) return base64;
-
-      const base64Data = base64.split(',')[1] || base64;
-      const buffer = Buffer.from(base64Data, 'base64');
-      const fileName = `challenge/${prefix}-${Date.now()}-${Math.random().toString(36).substring(7)}.png`;
-      
-      // Use the dedicated challenge-uploads bucket
-      const { error } = await supabase.storage.from('challenge-uploads').upload(fileName, buffer, { contentType: 'image/png' });
-      if (error) throw error;
-      
-      const { data: { publicUrl } } = supabase.storage.from('challenge-uploads').getPublicUrl(fileName);
-      return publicUrl;
-  };
-
-  const coverUrl = await uploadImage(coverImage, 'cover');
-  const pageUrls = await Promise.all(bookPages.map((page, i) => uploadImage(page, `page-${i+1}`)));
 
   // Get username
   const username = user.user_metadata.full_name || user.email?.split('@')[0] || "Anonymous Creator";
@@ -175,8 +157,8 @@ export async function submitChallengeEntry(
     title,
     prompt,
     category,
-    hero_image_url: coverUrl,
-    comic_pages: pageUrls, // Reusing comic_pages column for book pages
+    hero_image_url: coverImageUrl,
+    comic_pages: bookPageUrls,
   });
 
   if (error) throw error;
