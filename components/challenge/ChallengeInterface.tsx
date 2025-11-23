@@ -134,8 +134,8 @@ export function ChallengeInterface({ challenge, initialEntries, userUpvotes }: C
       // Reset form & draft
       reset();
     } catch (error) {
-      console.error(error);
-      alert("Submission failed. Please try again.");
+      console.error("Submission Error:", error);
+      alert(`Submission failed: ${error instanceof Error ? error.message : "Unknown error"}`);
     } finally {
       setIsSubmitting(false);
     }

@@ -17,5 +17,5 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
       isUpvoted = !!data;
   }
 
-  return <BookViewer entry={entry} initialIsUpvoted={isUpvoted} />;
+  return <BookViewer entry={entry} initialIsUpvoted={isUpvoted} currentUserId={user?.id} />;
 }

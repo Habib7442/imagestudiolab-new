@@ -4,21 +4,25 @@ import { useState } from "react";
 // @ts-ignore
 import HTMLFlipBook from "react-pageflip";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Heart, Share2, Download, Loader2 } from "lucide-react";
+import { ArrowLeft, Heart, Share2, Download, Loader2, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { toggleChallengeUpvote } from "@/actions/challenge-actions";
+import { toggleChallengeUpvote, deleteChallengeEntry } from "@/actions/challenge-actions";
 import { jsPDF } from "jspdf";
+import { useRouter } from "next/navigation";
 
 interface BookViewerProps {
     entry: any;
     initialIsUpvoted: boolean;
+    currentUserId?: string;
 }
 
-export function BookViewer({ entry, initialIsUpvoted }: BookViewerProps) {
+export function BookViewer({ entry, initialIsUpvoted, currentUserId }: BookViewerProps) {
     const [isUpvoted, setIsUpvoted] = useState(initialIsUpvoted);
     const [upvotesCount, setUpvotesCount] = useState(entry.upvotes_count || 0);
     const [isDownloading, setIsDownloading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const router = useRouter();
 
     const handleUpvote = async () => {
         const newState = !isUpvoted;
@@ -84,6 +88,20 @@ export function BookViewer({ entry, initialIsUpvoted }: BookViewerProps) {
         }
     };
 
+    const handleDelete = async () => {
+        if (!confirm("Are you sure you want to delete this book? This action cannot be undone.")) return;
+        setIsDeleting(true);
+        try {
+            await deleteChallengeEntry(entry.id);
+            alert("Book deleted successfully.");
+            router.push("/challenges");
+        } catch (e) {
+            console.error(e);
+            alert("Failed to delete book.");
+            setIsDeleting(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-black text-white flex flex-col items-center py-12">
             <div className="w-full max-w-6xl px-4 mb-8 flex items-center justify-between">
@@ -118,6 +136,17 @@ export function BookViewer({ entry, initialIsUpvoted }: BookViewerProps) {
                     >
                         {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                     </Button>
+                    {currentUserId === entry.user_id && (
+                        <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="rounded-full border-white/10 hover:bg-red-500/20 hover:text-red-500 hover:border-red-500/50"
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                        </Button>
+                    )}
                 </div>
             </div>
 

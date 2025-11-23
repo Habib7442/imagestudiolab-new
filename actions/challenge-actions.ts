@@ -217,3 +217,16 @@ export async function getUserChallengeUpvotes() {
     
     return data?.map(v => v.entry_id) || [];
 }
+
+export async function deleteChallengeEntry(entryId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized");
+
+    // Use RPC function for secure deletion with ownership verification
+    const { error } = await supabase.rpc('delete_challenge_entry', { entry_id_input: entryId });
+    if (error) throw error;
+    
+    revalidatePath('/challenges');
+    revalidatePath('/book');
+}
