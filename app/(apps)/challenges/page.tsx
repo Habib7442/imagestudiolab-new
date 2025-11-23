@@ -45,7 +45,11 @@ export default async function ChallengesPage() {
               </div>
               <h3 className="text-lg font-bold text-white mb-1">Prize Pool</h3>
               <p className="text-2xl font-bold text-yellow-400">{challenge.prize_amount}</p>
-              <p className="text-xs text-neutral-500 mt-2">Winner takes all (min 50 upvotes)</p>
+              <div className="text-xs text-neutral-400 mt-3 space-y-1">
+                <p className="text-yellow-500/80">🏆 Winner takes all</p>
+                <p>• Min 50 upvotes to qualify</p>
+                <p>• Highest upvoted entry wins</p>
+              </div>
             </div>
             
             <div className="bg-[#111] border border-white/10 rounded-2xl p-6 text-center hover:border-purple-500/30 transition-colors">
