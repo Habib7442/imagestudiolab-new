@@ -163,6 +163,38 @@ export default function Hero() {
           </Link>
         </motion.div>
 
+        {/* Weekly Challenge Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.55 }}
+          className="w-full max-w-4xl mx-auto mb-12"
+        >
+          <Link href="/challenges" className="block group relative overflow-hidden rounded-3xl border border-purple-500/20 bg-purple-500/5 hover:bg-purple-500/10 transition-all duration-500">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            
+            <div className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+              <div className="text-left">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">🏆</span>
+                  <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold uppercase tracking-wider animate-pulse">HOT</span>
+                  <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[10px] font-bold uppercase tracking-wider border border-purple-500/20">$10 Prize</span>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">
+                  Weekly Challenge: Share Your Talent
+                </h3>
+                <p className="text-neutral-400 text-sm max-w-md">
+                  Create a mini-book teaching your expertise. From cooking to coding, share what you know!
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-2 text-purple-400 font-bold text-sm group-hover:translate-x-1 transition-transform whitespace-nowrap">
+                Join Challenge <span className="text-lg">→</span>
+              </div>
+            </div>
+          </Link>
+        </motion.div>
+
         {/* Mini Apps Grid - Centered & Larger */}
         <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto text-left">
           {MINI_APPS.map((app, index) => (
