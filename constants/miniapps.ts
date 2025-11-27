@@ -10,6 +10,7 @@ export interface MiniApp {
 }
 
 export const MINI_APPS: MiniApp[] = [
+  /*
   {
     id: "polaroidx",
     name: "PolaroidX",
@@ -19,6 +20,17 @@ export const MINI_APPS: MiniApp[] = [
     status: "live",
     color: "#FF3333",
     gradient: "from-[#FF3333] to-[#FF2DAE]",
+  },
+  */
+  {
+    id: "photoshoot",
+    name: "AI Photoshoot",
+    description: "Professional AI photography. Transform your photos with filters like Noir, Blur, and Aesthetic while keeping your face perfect.",
+    href: "/photoshoot",
+    icon: "✨",
+    status: "live",
+    color: "#D946EF",
+    gradient: "from-fuchsia-500 to-purple-600",
   },
   {
     id: "yt-thumbnail",

@@ -9,6 +9,16 @@ import { generateThumbnail } from "@/actions/ai-actions";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function ThumbnailGenPage() {
   const [image, setImage] = useState<string | null>(null);
@@ -23,6 +33,7 @@ export default function ThumbnailGenPage() {
   const [aspectRatio, setAspectRatio] = useState("16:9");
   
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showLoginAlert, setShowLoginAlert] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const refInputRef = useRef<HTMLInputElement>(null);
@@ -106,20 +117,7 @@ export default function ThumbnailGenPage() {
 
   const handleDownload = async () => {
     if (!isLoggedIn) {
-      // Save state
-      const stateToSave = {
-        image,
-        generatedImage,
-        videoTitle,
-        niche,
-        colors,
-        customPrompt,
-        aspectRatio
-      };
-      localStorage.setItem('thumbnailGenState', JSON.stringify(stateToSave));
-      
-      alert("Please sign in to download your masterpiece! Your work has been saved.");
-      router.push('/login');
+      setShowLoginAlert(true);
       return;
     }
 
@@ -129,20 +127,24 @@ export default function ThumbnailGenPage() {
     link.click();
   };
 
-  const downloadButton = (generatedImage || image) ? (
-    <Button 
-      onClick={handleDownload}
-      className="bg-white text-black hover:bg-neutral-200 font-bold text-xs lg:text-sm px-3 lg:px-4"
-      size="sm"
-    >
-      <Download className="mr-2 h-3 w-3 lg:h-4 lg:w-4" /> 
-      <span className="hidden sm:inline">Download</span>
-    </Button>
-  ) : null;
+  const handleLoginRedirect = () => {
+    // Save state before redirecting
+    const stateToSave = {
+      image,
+      generatedImage,
+      videoTitle,
+      niche,
+      colors,
+      customPrompt,
+      aspectRatio
+    };
+    localStorage.setItem('thumbnailGenState', JSON.stringify(stateToSave));
+    router.push('/login');
+  };
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white font-sans selection:bg-[#FF0000] selection:text-white">
-      <Navbar actionButton={downloadButton} />
+      <Navbar />
       
       <main className="flex flex-col lg:flex-row h-screen w-full pt-16 lg:pt-20">
         
@@ -464,7 +466,7 @@ export default function ThumbnailGenPage() {
             
             {generatedImage || image ? (
               <div 
-                className="relative shadow-2xl w-full max-w-4xl transition-all duration-500"
+                className="relative shadow-2xl w-full max-w-4xl transition-all duration-500 group"
                 style={{
                   aspectRatio: aspectRatio.replace(":", "/"),
                 }}
@@ -474,6 +476,17 @@ export default function ThumbnailGenPage() {
                   alt="Preview" 
                   className="w-full h-full object-contain rounded-lg shadow-[0_0_50px_rgba(0,0,0,0.5)]"
                 />
+                {generatedImage && (
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex items-end justify-center pb-8 rounded-lg">
+                    <Button 
+                      onClick={handleDownload}
+                      className="bg-white text-black hover:bg-neutral-200 font-bold"
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Download HD
+                    </Button>
+                  </div>
+                )}
                 {isGenerating && (
                   <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center text-white rounded-lg z-20">
                     <Loader2 className="h-12 w-12 lg:h-16 lg:w-16 animate-spin text-[#FF0000] mb-4 lg:mb-6" />
@@ -493,6 +506,29 @@ export default function ThumbnailGenPage() {
           </div>
         </div>
       </main>
+      
+      {/* Login Alert Dialog */}
+      <AlertDialog open={showLoginAlert} onOpenChange={setShowLoginAlert}>
+        <AlertDialogContent className="bg-[#111] border-white/10">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white text-xl">Sign in to Download</AlertDialogTitle>
+            <AlertDialogDescription className="text-neutral-400">
+              Please sign in to download your viral thumbnail. Your work has been saved and will be restored after login!
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-white/5 text-white border-white/10 hover:bg-white/10">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleLoginRedirect}
+              className="bg-gradient-to-r from-[#FF0000] to-[#CC0000] text-white hover:from-[#CC0000] hover:to-[#990000]"
+            >
+              Sign In
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {

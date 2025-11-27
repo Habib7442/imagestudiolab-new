@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { LogOut, Menu, X, User } from "lucide-react";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 interface NavbarProps {
   actionButton?: React.ReactNode;
 }
@@ -18,6 +20,7 @@ export default function Navbar({ actionButton }: NavbarProps) {
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -32,6 +35,7 @@ export default function Navbar({ actionButton }: NavbarProps) {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsLoggedIn(!!session);
+      setUser(session?.user || null);
     };
     
     checkAuth();
@@ -39,6 +43,7 @@ export default function Navbar({ actionButton }: NavbarProps) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsLoggedIn(!!session);
+      setUser(session?.user || null);
     });
 
     return () => subscription.unsubscribe();
@@ -50,7 +55,7 @@ export default function Navbar({ actionButton }: NavbarProps) {
     router.push('/');
   };
 
-  const isOnAppPage = pathname === '/polaroid' || pathname === '/thumbnail-gen';
+  const isOnAppPage = pathname === '/photoshoot' || pathname === '/thumbnail-gen';
 
   return (
     <motion.nav 
@@ -102,7 +107,18 @@ export default function Navbar({ actionButton }: NavbarProps) {
         <div className="hidden md:flex items-center gap-3 lg:gap-4">
           {actionButton}
           {isLoggedIn ? (
-            <>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-8 w-8 border border-white/10">
+                  <AvatarImage src={user?.user_metadata?.avatar_url} />
+                  <AvatarFallback className="bg-neutral-800 text-neutral-400 text-xs">
+                    {user?.email?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm text-neutral-300 font-medium hidden lg:inline-block">
+                  {user?.email}
+                </span>
+              </div>
               <Button 
                 variant="ghost" 
                 size="sm"
@@ -112,20 +128,22 @@ export default function Navbar({ actionButton }: NavbarProps) {
                 <LogOut size={16} />
                 <span className="hidden lg:inline">Sign Out</span>
               </Button>
-            </>
+            </div>
           ) : (
-            <Button variant="ghost" size="sm" asChild className="text-neutral-400 hover:text-white hover:bg-white/5">
-              <Link href="/login">
-                Sign in
-              </Link>
-            </Button>
-          )}
-          {!isOnAppPage && !actionButton && (
-            <Button asChild size="sm" className="bg-[var(--color-brand-red)] hover:bg-red-600 text-white shadow-[0_0_15px_rgba(255,51,51,0.3)] hover:shadow-[0_0_25px_rgba(255,51,51,0.5)] border-none">
-              <Link href="/polaroid">
-                Get Started
-              </Link>
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="sm" asChild className="text-neutral-400 hover:text-white hover:bg-white/5">
+                <Link href="/login">
+                  Sign in
+                </Link>
+              </Button>
+              {!isOnAppPage && !actionButton && (
+                <Button asChild size="sm" className="bg-[var(--color-brand-red)] hover:bg-red-600 text-white shadow-[0_0_15px_rgba(255,51,51,0.3)] hover:shadow-[0_0_25px_rgba(255,51,51,0.5)] border-none">
+                  <Link href="/photoshoot">
+                    Get Started
+                  </Link>
+                </Button>
+              )}
+            </div>
           )}
         </div>
 
@@ -168,6 +186,15 @@ export default function Navbar({ actionButton }: NavbarProps) {
             <div className="pt-4 border-t border-white/10 space-y-3">
               {isLoggedIn ? (
                 <>
+                  <div className="flex items-center gap-3 px-2 py-2">
+                    <Avatar className="h-8 w-8 border border-white/10">
+                      <AvatarImage src={user?.user_metadata?.avatar_url} />
+                      <AvatarFallback className="bg-neutral-800 text-neutral-400 text-xs">
+                        {user?.email?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm text-white font-medium">{user?.email}</span>
+                  </div>
                   <Button
                     variant="ghost"
                     onClick={handleSignOut}
@@ -178,23 +205,25 @@ export default function Navbar({ actionButton }: NavbarProps) {
                   </Button>
                 </>
               ) : (
-                <Button
-                  variant="ghost"
-                  asChild
-                  className="w-full justify-start text-neutral-400 hover:text-white hover:bg-white/5"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Link href="/login">Sign in</Link>
-                </Button>
-              )}
-              {!isOnAppPage && (
-                <Button
-                  asChild
-                  className="w-full bg-[var(--color-brand-red)] hover:bg-red-600 text-white"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Link href="/polaroid">Get Started</Link>
-                </Button>
+                <>
+                  <Button
+                    variant="ghost"
+                    asChild
+                    className="w-full justify-start text-neutral-400 hover:text-white hover:bg-white/5"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Link href="/login">Sign in</Link>
+                  </Button>
+                  {!isOnAppPage && (
+                    <Button
+                      asChild
+                      className="w-full bg-[var(--color-brand-red)] hover:bg-red-600 text-white"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Link href="/photoshoot">Get Started</Link>
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           </div>
