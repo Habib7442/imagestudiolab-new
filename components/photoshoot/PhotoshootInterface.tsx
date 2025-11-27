@@ -18,6 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 const PREDEFINED_PROMPTS = [
   "Professional LinkedIn Headshot",
@@ -49,6 +50,8 @@ export default function PhotoshootInterface() {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
+  const [editPrompt, setEditPrompt] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   const userInputRef = useRef<HTMLInputElement>(null);
   const productInputRef = useRef<HTMLInputElement>(null);
@@ -110,11 +113,30 @@ export default function PhotoshootInterface() {
     try {
       const result = await generatePhotoshoot(userImage, productImage, prompt, selectedFilter);
       setGeneratedImage(result);
+      setEditPrompt(""); // Clear edit prompt on new generation
     } catch (error) {
       console.error(error);
       alert("Failed to generate photoshoot. Please try again.");
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleEdit = async () => {
+    if (!generatedImage || !editPrompt.trim()) return;
+    
+    setIsEditing(true);
+    
+    try {
+      const { generateImageEdit } = await import("@/actions/ai-actions");
+      const result = await generateImageEdit(generatedImage, editPrompt);
+      setGeneratedImage(result);
+      setEditPrompt(""); // Clear edit prompt after successful edit
+    } catch (err) {
+      console.error("Edit failed", err);
+      alert("Failed to edit image. Please try again.");
+    } finally {
+      setIsEditing(false);
     }
   };
 
@@ -256,14 +278,13 @@ export default function PhotoshootInterface() {
               </div>
               
               <div className="relative">
-                <input
-                  type="text"
+                <Textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Or describe your own vision..."
-                  className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-neutral-600 focus:outline-none focus:border-fuchsia-500/50 focus:ring-1 focus:ring-fuchsia-500/50 transition-all"
+                  className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/70 focus:outline-none focus:border-fuchsia-500/50 focus:ring-1 focus:ring-fuchsia-500/50 transition-all min-h-[100px] resize-none pr-10"
                 />
-                <Wand2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                <Wand2 className="absolute right-4 top-4 w-4 h-4 text-neutral-500" />
               </div>
             </div>
 
@@ -365,7 +386,59 @@ export default function PhotoshootInterface() {
                     <p className="text-fuchsia-400 font-medium animate-pulse">Developing your photos...</p>
                   </div>
                 )}
+                {isEditing && (
+                  <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                    <Loader2 className="w-12 h-12 text-fuchsia-500 animate-spin mb-4" />
+                    <p className="text-fuchsia-400 font-medium animate-pulse">Editing your photo...</p>
+                  </div>
+                )}
               </div>
+              
+              {/* Follow-up Edit Section */}
+              {generatedImage && !isGenerating && (
+                <div className="mt-6">
+                  <div className="bg-[#111] border border-white/10 rounded-2xl p-6">
+                    <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-3">
+                      Refine Your Photoshoot
+                    </h3>
+                    <p className="text-xs text-neutral-500 mb-4">
+                      Make adjustments like "remove background", "change lighting", "add more contrast", etc.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Textarea
+                        value={editPrompt}
+                        onChange={(e) => setEditPrompt(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleEdit()}
+                        placeholder="e.g., remove background, change lighting..."
+                        className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/70 focus:outline-none focus:border-fuchsia-500/50 focus:ring-1 focus:ring-fuchsia-500/50 transition-all min-h-[80px] resize-none"
+                        disabled={isEditing}
+                      />
+                      <button
+                        onClick={handleEdit}
+                        disabled={isEditing || !editPrompt.trim()}
+                        className={cn(
+                          "px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all",
+                          isEditing || !editPrompt.trim()
+                            ? "bg-neutral-800 text-neutral-500 cursor-not-allowed"
+                            : "bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white hover:shadow-[0_0_20px_rgba(217,70,239,0.4)]"
+                        )}
+                      >
+                        {isEditing ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Editing...
+                          </>
+                        ) : (
+                          <>
+                            <Wand2 className="w-4 h-4" />
+                            Edit
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

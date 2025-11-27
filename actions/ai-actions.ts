@@ -98,9 +98,21 @@ export async function generateImageEdit(imageBase64: string, prompt: string) {
     }
     
     throw new Error("No image data in response");
-  } catch (error) {
+  } catch (error: any) {
     console.error("AI Image Generation Error:", error);
-    throw error;
+    
+    // Provide user-friendly error messages
+    if (error?.status === 503) {
+      throw new Error("The AI service is currently overloaded. Please try again in a few moments.");
+    } else if (error?.status === 429) {
+      throw new Error("Too many requests. Please wait a moment before trying again.");
+    } else if (error?.message?.includes("quota")) {
+      throw new Error("API quota exceeded. Please try again later.");
+    }
+    
+    // Always throw a simple Error with a string message for proper serialization
+    const errorMessage = error?.message || error?.toString() || "Failed to edit image";
+    throw new Error(errorMessage);
   }
 }
 
@@ -142,7 +154,7 @@ export async function generateThumbnail(
         },
       ],
       config: {
-        responseModalities: ["IMAGE"],
+        responseModalities: ["TEXT", "IMAGE"],
         // @ts-ignore - Types might not be updated yet
         imageConfig: {
           aspectRatio: aspectRatio,
@@ -159,9 +171,21 @@ export async function generateThumbnail(
     }
     
     throw new Error("No image data in response");
-  } catch (error) {
+  } catch (error: any) {
     console.error("Thumbnail Generation Error:", error);
-    throw error;
+    
+    // Provide user-friendly error messages
+    if (error?.status === 503) {
+      throw new Error("The AI service is currently overloaded. Please try again in a few moments.");
+    } else if (error?.status === 429) {
+      throw new Error("Too many requests. Please wait a moment before trying again.");
+    } else if (error?.message?.includes("quota")) {
+      throw new Error("API quota exceeded. Please try again later.");
+    }
+    
+    // Always throw a simple Error with a string message for proper serialization
+    const errorMessage = error?.message || error?.toString() || "Failed to generate thumbnail";
+    throw new Error(errorMessage);
   }
 }
 

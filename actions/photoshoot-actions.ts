@@ -70,8 +70,20 @@ export async function generatePhotoshoot(
     }
 
     return `data:image/png;base64,${imagePart.inlineData.data}`;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Photoshoot Generation Error:", error);
-    throw error;
+    
+    // Provide user-friendly error messages
+    if (error?.status === 503) {
+      throw new Error("The AI service is currently overloaded. Please try again in a few moments.");
+    } else if (error?.status === 429) {
+      throw new Error("Too many requests. Please wait a moment before trying again.");
+    } else if (error?.message?.includes("quota")) {
+      throw new Error("API quota exceeded. Please try again later.");
+    }
+    
+    // Always throw a simple Error with a string message for proper serialization
+    const errorMessage = error?.message || error?.toString() || "Failed to generate photoshoot";
+    throw new Error(errorMessage);
   }
 }

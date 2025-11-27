@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Upload, Download, Wand2, Image as ImageIcon, Loader2, Settings2, X } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Upload, Download, Wand2, Image as ImageIcon, Loader2, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/shared/Navbar";
 import { cn, resizeImage } from "@/lib/utils";
 import { generateThumbnail } from "@/actions/ai-actions";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import {
@@ -19,6 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function ThumbnailGenPage() {
   const [image, setImage] = useState<string | null>(null);
@@ -34,6 +35,8 @@ export default function ThumbnailGenPage() {
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
+  const [editPrompt, setEditPrompt] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const refInputRef = useRef<HTMLInputElement>(null);
@@ -107,11 +110,30 @@ export default function ThumbnailGenPage() {
     try {
       const result = await generateThumbnail(image, finalPrompt, aspectRatio, referenceImage || undefined);
       setGeneratedImage(result);
+      setEditPrompt(""); // Clear edit prompt on new generation
     } catch (err) {
       console.error("Generation failed", err);
       alert("Failed to generate thumbnail. Please try again.");
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleEdit = async () => {
+    if (!generatedImage || !editPrompt.trim()) return;
+    
+    setIsEditing(true);
+    
+    try {
+      const { generateImageEdit } = await import("@/actions/ai-actions");
+      const result = await generateImageEdit(generatedImage, editPrompt);
+      setGeneratedImage(result);
+      setEditPrompt(""); // Clear edit prompt after successful edit
+    } catch (err) {
+      console.error("Edit failed", err);
+      alert("Failed to edit image. Please try again.");
+    } finally {
+      setIsEditing(false);
     }
   };
 
@@ -143,23 +165,42 @@ export default function ThumbnailGenPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white font-sans selection:bg-[#FF0000] selection:text-white">
+    <div className="min-h-screen bg-[#050505] text-white p-4 md:p-8 pt-24 md:pt-32 font-sans selection:bg-[#FF0000] selection:text-white">
       <Navbar />
-      
-      <main className="flex flex-col lg:flex-row h-screen w-full pt-16 lg:pt-20">
+      <div className="max-w-6xl mx-auto">
         
-        {/* Desktop Sidebar */}
-        <div className="hidden lg:flex flex-col w-1/3 bg-[#111] border-r border-white/10 p-6 h-[calc(100vh-80px)] overflow-hidden">
-          <h2 className="text-xl font-bold flex items-center gap-2 mb-6 flex-none">
-            <span className="text-[#FF0000]">▶️</span> Thumbnail Studio
-          </h2>
-          <div className="space-y-6 flex-1 h-full overflow-y-auto pb-10 custom-scrollbar pr-2">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          <div className="inline-flex items-center justify-center p-3 mb-4 rounded-2xl bg-[#FF0000]/10 border border-[#FF0000]/20 text-[#FF0000]">
+            <Sparkles className="w-6 h-6 mr-2" />
+            <span className="font-bold tracking-wider uppercase text-sm">AI Thumbnail Studio</span>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-red-200 to-red-400 bg-clip-text text-transparent">
+            Viral Thumbnails
+          </h1>
+          <p className="text-neutral-400 max-w-2xl mx-auto">
+            Upload your image, describe your video, and let AI create a click-worthy thumbnail in seconds.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* Left Panel: Controls */}
+          <div className="lg:col-span-5 space-y-8">
+            
             {/* 1. Main Image */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider">1. Subject Image (Required)</label>
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-white/20 rounded-lg p-4 text-center hover:border-[#FF0000] transition-colors bg-white/5 cursor-pointer relative group"
+                className={cn(
+                  "aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden relative group",
+                  image ? "border-[#FF0000]/50 bg-[#FF0000]/5" : "border-white/10 hover:border-white/20 hover:bg-white/5"
+                )}
               >
                 <input 
                   ref={fileInputRef}
@@ -169,17 +210,20 @@ export default function ThumbnailGenPage() {
                   className="hidden"
                 />
                 {image ? (
-                  <div className="relative aspect-video w-full overflow-hidden rounded">
+                  <>
                     <img src={image} alt="Source" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="text-xs font-bold">Change Image</span>
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <span className="text-xs font-bold uppercase tracking-wider">Change Image</span>
                     </div>
-                  </div>
+                  </>
                 ) : (
-                  <div className="py-6">
-                    <Upload className="mx-auto mb-2 text-neutral-500 group-hover:text-[#FF0000]" />
-                    <p className="text-xs text-neutral-400">Upload subject (Max 5MB)</p>
-                  </div>
+                  <>
+                    <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <Upload className="w-6 h-6 text-neutral-400" />
+                    </div>
+                    <span className="text-sm font-medium text-neutral-400">Upload Subject</span>
+                    <span className="text-xs text-neutral-600 mt-1">(Max 5MB)</span>
+                  </>
                 )}
               </div>
             </div>
@@ -193,7 +237,7 @@ export default function ThumbnailGenPage() {
                   value={videoTitle}
                   onChange={(e) => setVideoTitle(e.target.value)}
                   placeholder="e.g., I Spent 24 Hours in a Haunted House"
-                  className="w-full bg-black/50 border border-white/10 rounded px-3 py-2.5 text-sm focus:border-[#FF0000] outline-none transition-colors placeholder:text-neutral-600"
+                  className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-[#FF0000] focus:ring-1 focus:ring-[#FF0000] outline-none transition-all placeholder:text-neutral-600 text-white"
                 />
               </div>
 
@@ -205,7 +249,7 @@ export default function ThumbnailGenPage() {
                     value={niche}
                     onChange={(e) => setNiche(e.target.value)}
                     placeholder="e.g. Gaming"
-                    className="w-full bg-black/50 border border-white/10 rounded px-3 py-2.5 text-sm focus:border-[#FF0000] outline-none placeholder:text-neutral-600"
+                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-[#FF0000] focus:ring-1 focus:ring-[#FF0000] outline-none transition-all placeholder:text-neutral-600 text-white"
                   />
                 </div>
                 <div className="space-y-1">
@@ -215,7 +259,7 @@ export default function ThumbnailGenPage() {
                     value={colors}
                     onChange={(e) => setColors(e.target.value)}
                     placeholder="e.g. Red & Black"
-                    className="w-full bg-black/50 border border-white/10 rounded px-3 py-2.5 text-sm focus:border-[#FF0000] outline-none placeholder:text-neutral-600"
+                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-[#FF0000] focus:ring-1 focus:ring-[#FF0000] outline-none transition-all placeholder:text-neutral-600 text-white"
                   />
                 </div>
               </div>
@@ -231,7 +275,10 @@ export default function ThumbnailGenPage() {
               </label>
               <div 
                 onClick={() => refInputRef.current?.click()}
-                className="border border-dashed border-white/20 rounded-lg p-3 text-center hover:border-[#FF0000] transition-colors bg-white/5 cursor-pointer relative group"
+                className={cn(
+                  "h-24 rounded-xl border-2 border-dashed flex items-center justify-center cursor-pointer transition-all overflow-hidden relative group",
+                  referenceImage ? "border-blue-500/50 bg-blue-500/5" : "border-white/10 hover:border-white/20 hover:bg-white/5"
+                )}
               >
                 <input 
                   ref={refInputRef}
@@ -241,16 +288,18 @@ export default function ThumbnailGenPage() {
                   className="hidden"
                 />
                 {referenceImage ? (
-                  <div className="relative h-20 w-full overflow-hidden rounded flex items-center justify-center bg-black">
+                  <>
                     <img src={referenceImage} alt="Ref" className="h-full object-contain" />
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="text-xs font-bold">Change</span>
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <span className="text-xs font-bold uppercase tracking-wider">Change</span>
                     </div>
-                  </div>
+                  </>
                 ) : (
-                  <div className="flex items-center justify-center gap-2 py-2">
-                    <ImageIcon className="h-4 w-4 text-neutral-500" />
-                    <p className="text-xs text-neutral-400">Upload style reference</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                      <ImageIcon className="w-4 h-4 text-neutral-400" />
+                    </div>
+                    <span className="text-sm font-medium text-neutral-400">Upload Reference</span>
                   </div>
                 )}
               </div>
@@ -259,12 +308,11 @@ export default function ThumbnailGenPage() {
             {/* 4. Advanced / Custom Prompt */}
             <div className="space-y-1">
               <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider">4. Advanced AI Prompt (Optional)</label>
-              <textarea 
+              <Textarea 
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                rows={3}
-                className="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-sm leading-relaxed resize-none focus:border-[#FF0000] outline-none placeholder:text-neutral-600"
                 placeholder="Add specific details..."
+                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-neutral-600 focus:outline-none focus:border-[#FF0000] focus:ring-1 focus:ring-[#FF0000] transition-all min-h-[80px] resize-none"
               />
             </div>
 
@@ -277,10 +325,10 @@ export default function ThumbnailGenPage() {
                     key={ratio}
                     onClick={() => setAspectRatio(ratio)}
                     className={cn(
-                      "py-2 text-[10px] rounded border transition-colors",
+                      "py-3 text-xs font-medium rounded-xl border transition-all",
                       aspectRatio === ratio 
                         ? "bg-[#FF0000]/20 border-[#FF0000] text-[#FF0000]" 
-                        : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"
+                        : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10 hover:border-white/20"
                     )}
                   >
                     {ratio}
@@ -289,224 +337,147 @@ export default function ThumbnailGenPage() {
               </div>
             </div>
 
-            <Button 
+            {/* Generate Button */}
+            <button
               onClick={handleGenerate}
-              disabled={!image || isGenerating}
-              className="w-full bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:from-[#CC0000] hover:to-[#990000] text-white font-bold py-6 shadow-[0_0_20px_rgba(255,0,0,0.3)] hover:shadow-[0_0_30px_rgba(255,0,0,0.5)] transition-all mt-4"
+              disabled={isGenerating || !image}
+              className={cn(
+                "w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg",
+                isGenerating || !image
+                  ? "bg-neutral-800 text-neutral-500 cursor-not-allowed"
+                  : "bg-gradient-to-r from-[#FF0000] to-[#CC0000] text-white hover:shadow-[0_0_30px_rgba(255,0,0,0.4)] hover:scale-[1.02]"
+              )}
             >
               {isGenerating ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating...
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Generating...
                 </>
               ) : (
                 <>
-                  <Wand2 className="mr-2 h-5 w-5" /> Generate Thumbnail
+                  <Wand2 className="w-5 h-5" />
+                  Generate Thumbnail
                 </>
               )}
-            </Button>
+            </button>
+
           </div>
-        </div>
 
-        {/* Mobile Controls Sheet */}
-        <div className="lg:hidden fixed bottom-6 right-6 z-50">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button size="icon" className="h-14 w-14 rounded-full bg-[#FF0000] hover:bg-[#CC0000] shadow-lg border border-white/20">
-                <Settings2 className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="h-[85vh] bg-[#111] border-t border-white/10 rounded-t-xl px-6 pt-6">
-              <SheetHeader className="mb-4 text-left">
-                <SheetTitle className="text-white flex items-center gap-2">
-                  <span className="text-[#FF0000]">▶️</span> Thumbnail Studio
-                </SheetTitle>
-              </SheetHeader>
-              <div className="space-y-6 h-full overflow-y-auto pb-20 custom-scrollbar pr-2">
-                {/* Same content as desktop sidebar */}
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider">1. Subject Image (Required)</label>
-                  <div 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-white/20 rounded-lg p-4 text-center hover:border-[#FF0000] transition-colors bg-white/5 cursor-pointer relative group"
-                  >
-                    {image ? (
-                      <div className="relative aspect-video w-full overflow-hidden rounded">
-                        <img src={image} alt="Source" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <span className="text-xs font-bold">Change Image</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="py-6">
-                        <Upload className="mx-auto mb-2 text-neutral-500 group-hover:text-[#FF0000]" />
-                        <p className="text-xs text-neutral-400">Upload subject (Max 5MB)</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider">2. Video Topic</label>
-                    <input 
-                      type="text"
-                      value={videoTitle}
-                      onChange={(e) => setVideoTitle(e.target.value)}
-                      placeholder="e.g., I Spent 24 Hours in a Haunted House"
-                      className="w-full bg-black/50 border border-white/10 rounded px-3 py-2.5 text-sm focus:border-[#FF0000] outline-none transition-colors placeholder:text-neutral-600"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Niche</label>
-                      <input 
-                        type="text"
-                        value={niche}
-                        onChange={(e) => setNiche(e.target.value)}
-                        placeholder="e.g. Gaming"
-                        className="w-full bg-black/50 border border-white/10 rounded px-3 py-2.5 text-sm focus:border-[#FF0000] outline-none placeholder:text-neutral-600"
+          {/* Right Panel: Preview */}
+          <div className="lg:col-span-7">
+            <div className="sticky top-32">
+              <div className="w-full rounded-3xl bg-[#111] border border-white/10 overflow-hidden relative flex items-center justify-center min-h-[400px]">
+                
+                <AnimatePresence mode="wait">
+                  {generatedImage || image ? (
+                    <motion.div
+                      key="result"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="relative w-full h-full group flex items-center justify-center bg-[#0A0A0A]"
+                    >
+                      <img 
+                        src={generatedImage || image || ""} 
+                        alt="Preview" 
+                        className="w-full h-auto max-h-[70vh] object-contain" 
                       />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Colors</label>
-                      <input 
-                        type="text"
-                        value={colors}
-                        onChange={(e) => setColors(e.target.value)}
-                        placeholder="e.g. Red & Black"
-                        className="w-full bg-black/50 border border-white/10 rounded px-3 py-2.5 text-sm focus:border-[#FF0000] outline-none placeholder:text-neutral-600"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider flex justify-between">
-                    <span>3. Style Reference (Optional)</span>
-                    {referenceImage && (
-                      <button onClick={(e) => { e.stopPropagation(); setReferenceImage(null); }} className="text-[10px] text-red-500 hover:underline">Remove</button>
-                    )}
-                  </label>
-                  <div 
-                    onClick={() => refInputRef.current?.click()}
-                    className="border border-dashed border-white/20 rounded-lg p-3 text-center hover:border-[#FF0000] transition-colors bg-white/5 cursor-pointer relative group"
-                  >
-                    {referenceImage ? (
-                      <div className="relative h-20 w-full overflow-hidden rounded flex items-center justify-center bg-black">
-                        <img src={referenceImage} alt="Ref" className="h-full object-contain" />
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <span className="text-xs font-bold">Change</span>
+                      
+                      {generatedImage && (
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex items-end justify-center pb-8">
+                          <button 
+                            onClick={handleDownload}
+                            className="px-6 py-3 bg-white text-black rounded-full font-bold flex items-center gap-2 hover:scale-105 transition-transform"
+                          >
+                            <Download className="w-4 h-4" />
+                            Download HD
+                          </button>
                         </div>
+                      )}
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="placeholder"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-center p-8"
+                    >
+                      <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6 animate-pulse">
+                        <ImageIcon className="w-10 h-10 text-neutral-600" />
                       </div>
-                    ) : (
-                      <div className="flex items-center justify-center gap-2 py-2">
-                        <ImageIcon className="h-4 w-4 text-neutral-500" />
-                        <p className="text-xs text-neutral-400">Upload style reference</p>
-                      </div>
-                    )}
+                      <h3 className="text-xl font-bold text-neutral-300 mb-2">Ready to Create</h3>
+                      <p className="text-neutral-500 max-w-sm mx-auto">
+                        Upload an image and describe your video to generate a viral thumbnail.
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {isGenerating && (
+                  <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                    <Loader2 className="w-12 h-12 text-[#FF0000] animate-spin mb-4" />
+                    <p className="text-[#FF0000] font-medium animate-pulse">Designing Viral Thumbnail...</p>
                   </div>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider">4. Advanced AI Prompt (Optional)</label>
-                  <textarea 
-                    value={customPrompt}
-                    onChange={(e) => setCustomPrompt(e.target.value)}
-                    rows={3}
-                    className="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-sm leading-relaxed resize-none focus:border-[#FF0000] outline-none placeholder:text-neutral-600"
-                    placeholder="Add specific details..."
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Aspect Ratio</label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {["16:9", "4:3", "1:1", "9:16"].map((ratio) => (
+                )}
+                {isEditing && (
+                  <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                    <Loader2 className="w-12 h-12 text-[#FF0000] animate-spin mb-4" />
+                    <p className="text-[#FF0000] font-medium animate-pulse">Editing Thumbnail...</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Follow-up Edit Section */}
+              {generatedImage && !isGenerating && (
+                <div className="mt-6">
+                  <div className="bg-[#111] border border-white/10 rounded-2xl p-6">
+                    <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-3">
+                      Refine Your Thumbnail
+                    </h3>
+                    <p className="text-xs text-neutral-500 mb-4">
+                      Make adjustments like "remove background", "change colors to blue", "add more contrast", etc.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Textarea
+                        value={editPrompt}
+                        onChange={(e) => setEditPrompt(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleEdit()}
+                        placeholder="e.g., remove background, change colors..."
+                        className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/70 focus:outline-none focus:border-[#FF0000]/50 focus:ring-1 focus:ring-[#FF0000]/50 transition-all min-h-[80px] resize-none"
+                        disabled={isEditing}
+                      />
                       <button
-                        key={ratio}
-                        onClick={() => setAspectRatio(ratio)}
+                        onClick={handleEdit}
+                        disabled={isEditing || !editPrompt.trim()}
                         className={cn(
-                          "py-2 text-[10px] rounded border transition-colors",
-                          aspectRatio === ratio 
-                            ? "bg-[#FF0000]/20 border-[#FF0000] text-[#FF0000]" 
-                            : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"
+                          "px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all",
+                          isEditing || !editPrompt.trim()
+                            ? "bg-neutral-800 text-neutral-500 cursor-not-allowed"
+                            : "bg-gradient-to-r from-[#FF0000] to-[#CC0000] text-white hover:shadow-[0_0_20px_rgba(255,0,0,0.4)]"
                         )}
                       >
-                        {ratio}
+                        {isEditing ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Editing...
+                          </>
+                        ) : (
+                          <>
+                            <Wand2 className="w-4 h-4" />
+                            Edit
+                          </>
+                        )}
                       </button>
-                    ))}
+                    </div>
                   </div>
                 </div>
-
-                <Button 
-                  onClick={handleGenerate}
-                  disabled={!image || isGenerating}
-                  className="w-full bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:from-[#CC0000] hover:to-[#990000] text-white font-bold py-6 shadow-[0_0_20px_rgba(255,0,0,0.3)] hover:shadow-[0_0_30px_rgba(255,0,0,0.5)] transition-all mt-4"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Wand2 className="mr-2 h-5 w-5" /> Generate Thumbnail
-                    </>
-                  )}
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-
-        {/* Preview Area */}
-        <div className="flex-1 flex flex-col h-full">
-          <div className="flex-1 flex items-center justify-center bg-[#0A0A0A] p-4 lg:p-8 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#FF0000]/5 via-transparent to-transparent" />
-            
-            {generatedImage || image ? (
-              <div 
-                className="relative shadow-2xl w-full max-w-4xl transition-all duration-500 group"
-                style={{
-                  aspectRatio: aspectRatio.replace(":", "/"),
-                }}
-              >
-                <img 
-                  src={generatedImage || image || ""} 
-                  alt="Preview" 
-                  className="w-full h-full object-contain rounded-lg shadow-[0_0_50px_rgba(0,0,0,0.5)]"
-                />
-                {generatedImage && (
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex items-end justify-center pb-8 rounded-lg">
-                    <Button 
-                      onClick={handleDownload}
-                      className="bg-white text-black hover:bg-neutral-200 font-bold"
-                    >
-                      <Download className="mr-2 h-4 w-4" />
-                      Download HD
-                    </Button>
-                  </div>
-                )}
-                {isGenerating && (
-                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center text-white rounded-lg z-20">
-                    <Loader2 className="h-12 w-12 lg:h-16 lg:w-16 animate-spin text-[#FF0000] mb-4 lg:mb-6" />
-                    <p className="text-lg lg:text-xl font-bold animate-pulse">Designing Viral Thumbnail...</p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-center text-neutral-500">
-                <div className="w-20 h-20 lg:w-24 lg:h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 lg:mb-6 border border-white/10">
-                  <ImageIcon className="h-8 w-8 lg:h-10 lg:w-10 opacity-20" />
-                </div>
-                <p className="text-base lg:text-lg font-medium">Upload a subject image to start</p>
-                <p className="text-xs lg:text-sm opacity-50 mt-2">Use the controls to customize</p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
+
         </div>
-      </main>
-      
+      </div>
+
       {/* Login Alert Dialog */}
       <AlertDialog open={showLoginAlert} onOpenChange={setShowLoginAlert}>
         <AlertDialogContent className="bg-[#111] border-white/10">
@@ -529,19 +500,6 @@ export default function ThumbnailGenPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 2px;
-        }
-      `}</style>
     </div>
   );
 }
