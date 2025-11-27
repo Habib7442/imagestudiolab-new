@@ -32,7 +32,7 @@ const items = [
   {
     id: 6,
     src: "/our-generations/6.png",
-    className: "md:col-span-2 md:row-span-1", // Wide
+    className: "md:col-span-3 md:row-span-1", // Full width to fill gap
   },
   {
     id: 7,

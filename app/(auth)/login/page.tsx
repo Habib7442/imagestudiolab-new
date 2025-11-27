@@ -6,6 +6,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { login, signup, signInWithGoogle } from "../actions";
 import { CheckCircle2, XCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
 
@@ -22,6 +23,7 @@ function LoginForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const searchParams = useSearchParams();
   const returnTo = searchParams.get('returnTo') || '/';
   const errorMessage = searchParams.get('error');
@@ -127,6 +129,10 @@ function LoginForm() {
               <Button
                 type="button"
                 onClick={async () => {
+                  if (!isLogin && !termsAccepted) {
+                    alert("Please accept the Terms and Conditions to continue.");
+                    return;
+                  }
                   setIsLoading(true);
                   await signInWithGoogle(returnTo);
                 }}
@@ -202,10 +208,28 @@ function LoginForm() {
                 </div>
               </div>
 
+              {/* Terms Checkbox */}
+              {!isLogin && (
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="terms" 
+                    checked={termsAccepted}
+                    onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                    className="border-white/20 data-[state=checked]:bg-[var(--color-brand-red)] data-[state=checked]:border-[var(--color-brand-red)]"
+                  />
+                  <label
+                    htmlFor="terms"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-neutral-400"
+                  >
+                    I accept the <Link href="/terms-of-service" className="text-[var(--color-brand-red)] hover:underline">Terms</Link> and <Link href="/privacy-policy" className="text-[var(--color-brand-red)] hover:underline">Privacy Policy</Link>
+                  </label>
+                </div>
+              )}
+
               {/* Submit Button */}
               <Button 
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || (!isLogin && !termsAccepted)}
                 className="w-full bg-[var(--color-brand-red)] hover:bg-red-600 text-white font-bold py-6 rounded-xl shadow-[0_0_20px_rgba(255,51,51,0.3)] hover:shadow-[0_0_30px_rgba(255,51,51,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
