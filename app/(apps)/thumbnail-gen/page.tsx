@@ -2,11 +2,10 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Download, Wand2, Image as ImageIcon, Loader2, X, Sparkles } from "lucide-react";
+import { Upload, Download, Wand2, Image as ImageIcon, Loader2, X, Sparkles, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/shared/Navbar";
 import { cn, resizeImage } from "@/lib/utils";
-import { generateThumbnail } from "@/actions/ai-actions";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import {
@@ -20,6 +19,19 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+const dataURLtoBlob = (dataurl: string) => {
+  const arr = dataurl.split(',');
+  const mime = arr[0].match(/:(.*?);/)?.[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while(n--){
+      u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], {type:mime});
+}
 
 export default function ThumbnailGenPage() {
   const [image, setImage] = useState<string | null>(null);
@@ -37,6 +49,7 @@ export default function ThumbnailGenPage() {
   const [showLoginAlert, setShowLoginAlert] = useState(false);
   const [editPrompt, setEditPrompt] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const refInputRef = useRef<HTMLInputElement>(null);
@@ -76,7 +89,7 @@ export default function ThumbnailGenPage() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert("File is too large. Please upload images under 5MB.");
+        setError("File is too large. Please upload images under 5MB.");
         return;
       }
       try {
@@ -87,8 +100,10 @@ export default function ThumbnailGenPage() {
           setImage(resized);
           setGeneratedImage(null);
         }
+        setError(null);
       } catch (err) {
         console.error("Failed to process image", err);
+        setError("Failed to process image. Please try again.");
       }
     }
   };
@@ -97,6 +112,7 @@ export default function ThumbnailGenPage() {
     if (!image) return;
     
     setIsGenerating(true);
+    setError(null);
     
     // Construct Prompt
     let finalPrompt = `Create a viral YouTube thumbnail for a video about "${videoTitle || 'this subject'}". `;
@@ -108,12 +124,30 @@ export default function ThumbnailGenPage() {
     }
 
     try {
-      const result = await generateThumbnail(image, finalPrompt, aspectRatio, referenceImage || undefined);
-      setGeneratedImage(result);
-      setEditPrompt(""); // Clear edit prompt on new generation
-    } catch (err) {
+      const formData = new FormData();
+      formData.append("image", dataURLtoBlob(image));
+      formData.append("prompt", finalPrompt);
+      formData.append("aspectRatio", aspectRatio);
+      if (referenceImage) {
+        formData.append("referenceImage", dataURLtoBlob(referenceImage));
+      }
+
+      const response = await fetch("/api/generate-thumbnail", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate thumbnail");
+      }
+
+      setGeneratedImage(data.result);
+      setEditPrompt(""); 
+    } catch (err: any) {
       console.error("Generation failed", err);
-      alert("Failed to generate thumbnail. Please try again.");
+      setError(err.message || "Failed to generate thumbnail. Please try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -123,15 +157,16 @@ export default function ThumbnailGenPage() {
     if (!generatedImage || !editPrompt.trim()) return;
     
     setIsEditing(true);
+    setError(null);
     
     try {
       const { generateImageEdit } = await import("@/actions/ai-actions");
       const result = await generateImageEdit(generatedImage, editPrompt);
       setGeneratedImage(result);
       setEditPrompt(""); // Clear edit prompt after successful edit
-    } catch (err) {
+    } catch (err: any) {
       console.error("Edit failed", err);
-      alert("Failed to edit image. Please try again.");
+      setError(err.message || "Failed to edit image. Please try again.");
     } finally {
       setIsEditing(false);
     }
@@ -186,6 +221,16 @@ export default function ThumbnailGenPage() {
             Upload your image, describe your video, and let AI create a click-worthy thumbnail in seconds.
           </p>
         </motion.div>
+
+        {error && (
+          <div className="mb-8 max-w-2xl mx-auto">
+            <Alert variant="destructive" className="bg-red-500/10 border-red-500/50 text-red-400">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           

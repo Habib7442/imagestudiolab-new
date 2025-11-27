@@ -2,8 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Sparkles, Image as ImageIcon, Camera, Wand2, Loader2, Download, X, ShoppingBag } from "lucide-react";
-import { generatePhotoshoot } from "@/actions/photoshoot-actions";
+import { Upload, Sparkles, Image as ImageIcon, Camera, Wand2, Loader2, Download, X, ShoppingBag, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/shared/Navbar";
 import { createClient } from "@/lib/supabase/client";
@@ -19,6 +18,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const PREDEFINED_PROMPTS = [
   "Professional LinkedIn Headshot",
@@ -41,6 +41,18 @@ const FILTERS = [
   { id: "filmy", name: "Filmy", color: "bg-orange-400" }
 ];
 
+const dataURLtoBlob = (dataurl: string) => {
+  const arr = dataurl.split(',');
+  const mime = arr[0].match(/:(.*?);/)?.[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while(n--){
+      u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], {type:mime});
+}
+
 export default function PhotoshootInterface() {
   const [userImage, setUserImage] = useState<string | null>(null);
   const [productImage, setProductImage] = useState<string | null>(null);
@@ -52,6 +64,7 @@ export default function PhotoshootInterface() {
   const [showLoginAlert, setShowLoginAlert] = useState(false);
   const [editPrompt, setEditPrompt] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const userInputRef = useRef<HTMLInputElement>(null);
   const productInputRef = useRef<HTMLInputElement>(null);
@@ -92,6 +105,7 @@ export default function PhotoshootInterface() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setter(reader.result as string);
+        setError(null);
       };
       reader.readAsDataURL(file);
     }
@@ -99,24 +113,43 @@ export default function PhotoshootInterface() {
 
   const handleGenerate = async () => {
     if (!userImage) {
-      alert("Please upload your photo first!");
+      setError("Please upload your photo first!");
       return;
     }
     if (!prompt) {
-      alert("Please enter or select a prompt!");
+      setError("Please enter or select a prompt!");
       return;
     }
 
     setIsGenerating(true);
     setGeneratedImage(null);
+    setError(null);
 
     try {
-      const result = await generatePhotoshoot(userImage, productImage, prompt, selectedFilter);
-      setGeneratedImage(result);
-      setEditPrompt(""); // Clear edit prompt on new generation
-    } catch (error) {
+      const formData = new FormData();
+      formData.append("userImage", dataURLtoBlob(userImage));
+      if (productImage) {
+        formData.append("productImage", dataURLtoBlob(productImage));
+      }
+      formData.append("prompt", prompt);
+      formData.append("filter", selectedFilter);
+
+      const response = await fetch("/api/generate-photoshoot", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate photoshoot");
+      }
+
+      setGeneratedImage(data.result);
+      setEditPrompt(""); 
+    } catch (error: any) {
       console.error(error);
-      alert("Failed to generate photoshoot. Please try again.");
+      setError(error.message || "Failed to generate photoshoot. Please try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -126,15 +159,16 @@ export default function PhotoshootInterface() {
     if (!generatedImage || !editPrompt.trim()) return;
     
     setIsEditing(true);
+    setError(null);
     
     try {
       const { generateImageEdit } = await import("@/actions/ai-actions");
       const result = await generateImageEdit(generatedImage, editPrompt);
       setGeneratedImage(result);
-      setEditPrompt(""); // Clear edit prompt after successful edit
-    } catch (err) {
+      setEditPrompt(""); 
+    } catch (err: any) {
       console.error("Edit failed", err);
-      alert("Failed to edit image. Please try again.");
+      setError(err.message || "Failed to edit image. Please try again.");
     } finally {
       setIsEditing(false);
     }
@@ -191,6 +225,16 @@ export default function PhotoshootInterface() {
             Upload your photo, choose a vibe, and let AI create a professional photoshoot while keeping your face perfectly preserved.
           </p>
         </motion.div>
+
+        {error && (
+          <div className="mb-8 max-w-2xl mx-auto">
+            <Alert variant="destructive" className="bg-red-500/10 border-red-500/50 text-red-400">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
