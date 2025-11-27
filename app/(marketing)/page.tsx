@@ -6,6 +6,8 @@ import { Zap, Layers, ShieldCheck } from "lucide-react";
 import Navbar from "@/components/shared/Navbar";
 import Hero from "@/components/shared/Hero";
 
+import OurGenerations from "@/components/shared/OurGenerations";
+
 // --- Components ---
 
 const FeatureCard = ({ icon: Icon, title, desc }: { icon: any, title: string, desc: string }) => (
@@ -32,6 +34,8 @@ export default function LandingPage() {
       
       <Navbar />
       <Hero />
+      
+      <OurGenerations />
 
       {/* --- CARDS SECTION --- */}
 
