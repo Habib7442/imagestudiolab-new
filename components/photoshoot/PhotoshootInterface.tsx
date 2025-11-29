@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Sparkles, Image as ImageIcon, Camera, Wand2, Loader2, Download, X, ShoppingBag, AlertCircle } from "lucide-react";
+import { Upload, Sparkles, Image as ImageIcon, Camera, Wand2, Loader2, Download, X, ShoppingBag, AlertCircle, Mic } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/shared/Navbar";
 import { createClient } from "@/lib/supabase/client";
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import VoiceControl, { VoiceControlRef } from "./VoiceControl";
 
 const PREDEFINED_PROMPTS = [
   "Professional LinkedIn Headshot",
@@ -68,6 +69,8 @@ export default function PhotoshootInterface() {
 
   const userInputRef = useRef<HTMLInputElement>(null);
   const productInputRef = useRef<HTMLInputElement>(null);
+  const promptVoiceRef = useRef<VoiceControlRef>(null);
+  const editVoiceRef = useRef<VoiceControlRef>(null);
   const supabase = createClient();
   const router = useRouter();
 
@@ -111,12 +114,14 @@ export default function PhotoshootInterface() {
     }
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (promptOverride?: string) => {
+    const activePrompt = typeof promptOverride === 'string' ? promptOverride : prompt;
+
     if (!userImage) {
       setError("Please upload your photo first!");
       return;
     }
-    if (!prompt) {
+    if (!activePrompt) {
       setError("Please enter or select a prompt!");
       return;
     }
@@ -131,7 +136,7 @@ export default function PhotoshootInterface() {
       if (productImage) {
         formData.append("productImage", dataURLtoBlob(productImage));
       }
-      formData.append("prompt", prompt);
+      formData.append("prompt", activePrompt);
       formData.append("filter", selectedFilter);
 
       const response = await fetch("/api/generate-photoshoot", {
@@ -326,9 +331,18 @@ export default function PhotoshootInterface() {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Or describe your own vision..."
-                  className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/70 focus:outline-none focus:border-fuchsia-500/50 focus:ring-1 focus:ring-fuchsia-500/50 transition-all min-h-[100px] resize-none pr-10"
+                  className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/70 focus:outline-none focus:border-fuchsia-500/50 focus:ring-1 focus:ring-fuchsia-500/50 transition-all min-h-[100px] resize-none pr-20"
                 />
-                <Wand2 className="absolute right-4 top-4 w-4 h-4 text-neutral-500" />
+                <div className="absolute right-4 top-4 flex items-center gap-2">
+                  {userImage && (
+                    <VoiceControl 
+                      ref={promptVoiceRef}
+                      onTranscriptionComplete={(text) => setPrompt(text)}
+                      hasUserImage={!!userImage}
+                    />
+                  )}
+                  <Wand2 className="w-4 h-4 text-neutral-500" />
+                </div>
               </div>
             </div>
 
@@ -356,7 +370,7 @@ export default function PhotoshootInterface() {
 
             {/* Generate Button */}
             <button
-              onClick={handleGenerate}
+              onClick={() => handleGenerate()}
               disabled={isGenerating || !userImage || !prompt}
               className={cn(
                 "w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg",
@@ -449,14 +463,23 @@ export default function PhotoshootInterface() {
                       Make adjustments like "remove background", "change lighting", "add more contrast", etc.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3">
-                      <Textarea
-                        value={editPrompt}
-                        onChange={(e) => setEditPrompt(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleEdit()}
-                        placeholder="e.g., remove background, change lighting..."
-                        className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/70 focus:outline-none focus:border-fuchsia-500/50 focus:ring-1 focus:ring-fuchsia-500/50 transition-all min-h-[80px] resize-none"
-                        disabled={isEditing}
-                      />
+                      <div className="flex-1 relative">
+                        <Textarea
+                          value={editPrompt}
+                          onChange={(e) => setEditPrompt(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleEdit()}
+                          placeholder="e.g., remove background, change lighting..."
+                          className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/70 focus:outline-none focus:border-fuchsia-500/50 focus:ring-1 focus:ring-fuchsia-500/50 transition-all min-h-[80px] resize-none pr-12"
+                          disabled={isEditing}
+                        />
+                        <div className="absolute right-3 top-3">
+                          <VoiceControl 
+                            ref={editVoiceRef}
+                            onTranscriptionComplete={(text) => setEditPrompt(text)}
+                            hasUserImage={!!userImage}
+                          />
+                        </div>
+                      </div>
                       <button
                         onClick={handleEdit}
                         disabled={isEditing || !editPrompt.trim()}
@@ -511,6 +534,8 @@ export default function PhotoshootInterface() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+
     </div>
   );
 }
