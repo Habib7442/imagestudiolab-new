@@ -42,4 +42,14 @@ export const MINI_APPS: MiniApp[] = [
     color: "#FF0000",
     gradient: "from-[#FF0000] to-[#282828]",
   },
+  {
+    id: "carousel-maker",
+    name: "AI Carousel Maker",
+    description: "Turn YouTube videos, PDFs, or ideas into engaging, swipeable social media carousels in seconds.",
+    href: "/carousel",
+    icon: "🎠",
+    status: "live",
+    color: "#A855F7",
+    gradient: "from-purple-600 to-pink-600",
+  },
 ];

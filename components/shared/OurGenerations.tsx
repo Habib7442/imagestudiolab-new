@@ -39,6 +39,13 @@ const items = [
     src: "/our-generations/7.png",
     className: "md:col-span-3 md:row-span-2", // Ultra Wide Feature
   },
+  {
+    id: 8,
+    src: "/our-generations/carousel-card.png", // You'll need to ensure this image exists or use a placeholder
+    className: "md:col-span-3 md:row-span-1 bg-gradient-to-r from-purple-900/50 to-pink-900/50 border-fuchsia-500/30", 
+    title: "AI Carousel Maker",
+    link: "/carousel"
+  },
 ];
 
 export default function OurGenerations() {
@@ -89,18 +96,31 @@ export default function OurGenerations() {
               item.className
             )}
           >
-            <img 
-              src={item.src} 
-              alt={`Generation ${item.id}`}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-            
-            <div className="absolute bottom-4 left-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full">
-                <span className="text-xs font-medium text-white">Generated with AI</span>
-              </div>
-            </div>
+            {item.title ? (
+                <a href={item.link} className="block w-full h-full relative overflow-hidden flex items-center justify-center">
+                    <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-600/20 to-purple-600/20 z-0" />
+                    <div className="relative z-10 text-center p-8">
+                        <h3 className="text-3xl md:text-4xl font-bold text-white mb-2">{item.title}</h3>
+                        <p className="text-neutral-300">Create viral carousels in seconds →</p>
+                    </div>
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
+                </a>
+            ) : (
+                <>
+                    <img 
+                    src={item.src} 
+                    alt={`Generation ${item.id}`}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+                    
+                    <div className="absolute bottom-4 left-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                    <div className="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full">
+                        <span className="text-xs font-medium text-white">Generated with AI</span>
+                    </div>
+                    </div>
+                </>
+            )}
           </motion.div>
         ))}
       </div>
