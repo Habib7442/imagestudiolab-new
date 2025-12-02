@@ -54,6 +54,8 @@ export function CarouselGenerator() {
   // Inputs
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [topic, setTopic] = useState("");
+  const [content, setContent] = useState("");
+  const [slideCount, setSlideCount] = useState(6);
   const [file, setFile] = useState<File | null>(null);
 
   // Edit State
@@ -107,7 +109,11 @@ export function CarouselGenerator() {
     formData.append("aspectRatio", aspectRatio);
 
     if (activeTab === "youtube") formData.append("url", youtubeUrl);
-    else if (activeTab === "topic") formData.append("topic", topic);
+    else if (activeTab === "topic") {
+      formData.append("topic", topic);
+      formData.append("content", content);
+      formData.append("slideCount", slideCount.toString());
+    }
     else if ((activeTab === "pdf" || activeTab === "image") && file) {
       formData.append("file", file);
     }
@@ -389,14 +395,39 @@ export function CarouselGenerator() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="topic" className="mt-0 space-y-3">
-                <Label className="text-neutral-400 uppercase text-xs font-bold tracking-wider">Topic / Prompt</Label>
-                <Textarea 
-                  placeholder="E.g., 5 Tips for Better Sleep, The History of AI..." 
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  className="bg-black border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-neutral-600 focus:border-fuchsia-500/50 focus:ring-fuchsia-500/20 min-h-[150px] resize-none"
-                />
+              <TabsContent value="topic" className="mt-0 space-y-4">
+                <div className="space-y-3">
+                  <Label className="text-neutral-400 uppercase text-xs font-bold tracking-wider">Topic / Prompt</Label>
+                  <Textarea 
+                    placeholder="E.g., 5 Tips for Better Sleep, The History of AI..." 
+                    value={topic}
+                    onChange={(e) => setTopic(e.target.value)}
+                    className="bg-black border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-neutral-600 focus:border-fuchsia-500/50 focus:ring-fuchsia-500/20 min-h-[100px] resize-none"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-neutral-400 uppercase text-xs font-bold tracking-wider">Content (Optional)</Label>
+                  <Textarea 
+                    placeholder="Paste your own content here if you have it..." 
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    className="bg-black border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-neutral-600 focus:border-fuchsia-500/50 focus:ring-fuchsia-500/20 min-h-[100px] resize-none"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-neutral-400 uppercase text-xs font-bold tracking-wider">Number of Slides</Label>
+                  <select 
+                    value={slideCount}
+                    onChange={(e) => setSlideCount(Number(e.target.value))}
+                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:border-fuchsia-500/50 focus:ring-fuchsia-500/20 outline-none"
+                  >
+                    <option value={6}>6 Slides</option>
+                    <option value={8}>8 Slides</option>
+                    <option value={10}>10 Slides</option>
+                  </select>
+                </div>
               </TabsContent>
 
               <TabsContent value="design" className="mt-0 space-y-4">

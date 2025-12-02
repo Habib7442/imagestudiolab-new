@@ -103,6 +103,8 @@ export async function POST(req: NextRequest) {
         let contextImageParts: any[] = [];
         const aspectRatio = (formData.get('aspectRatio') as string) || "3:4";
 
+        const slideCount = parseInt(formData.get('slideCount') as string) || 6;
+
         // 1. Extract Context based on Type
         console.log("Received request type:", type);
 
@@ -156,8 +158,12 @@ export async function POST(req: NextRequest) {
                 contextText = "Analyze this image and create a carousel based on its content.";
             }
         } else if (type === 'topic') {
-            contextText = (formData.get('topic') as string) || "";
-            if (!contextText.trim()) return NextResponse.json({ error: "Topic is empty" }, { status: 400 });
+            const topic = (formData.get('topic') as string) || "";
+            const content = (formData.get('content') as string) || "";
+            
+            if (!topic.trim()) return NextResponse.json({ error: "Topic is empty" }, { status: 400 });
+            
+            contextText = `Topic: ${topic}\n\nAdditional Content/Context:\n${content}`;
         }
 
         if (!contextText && contextImageParts.length === 0) {
@@ -167,12 +173,12 @@ export async function POST(req: NextRequest) {
 
         // 2. Generate Slide Structure (Text)
         const systemPrompt = `
-            You are an expert social media content creator. Create a 6-slide carousel based on the provided context.
+            You are an expert social media content creator. Create a ${slideCount}-slide carousel based on the provided context.
             
             Structure:
             - Slide 1: Hook/Cover (Catchy title, intriguing visual description)
-            - Slide 2-5: Key Points/Educational Content (One main idea per slide, concise text)
-            - Slide 6: Call to Action/Summary
+            - Slide 2-${slideCount - 1}: Key Points/Educational Content (One main idea per slide, concise text)
+            - Slide ${slideCount}: Call to Action/Summary
 
             Output Format: JSON Array of objects.
             [
@@ -206,8 +212,8 @@ export async function POST(req: NextRequest) {
         }
 
         // 3. Generate Images for each slide (Parallel)
-        // We limit to 6 slides max to save resources/time
-        const limitedSlides = slidesJson.slice(0, 6);
+        // We limit to slideCount slides max to save resources/time
+        const limitedSlides = slidesJson.slice(0, slideCount);
         
         const slidesWithImages = await Promise.all(limitedSlides.map(async (slide, index) => {
             // Enhance prompt for consistency - use the actual aspect ratio

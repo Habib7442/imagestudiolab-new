@@ -23,7 +23,7 @@ export default function CarouselPage() {
             Create Viral Carousels
           </h1>
           <p className="text-neutral-400 max-w-2xl mx-auto text-lg">
-            Turn YouTube videos, PDFs, or ideas into engaging, swipeable social media carousels in seconds.
+            Turn PDFs, or ideas into engaging, swipeable social media carousels in seconds.
           </p>
         </div>
         
