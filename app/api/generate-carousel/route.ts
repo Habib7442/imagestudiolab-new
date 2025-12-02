@@ -98,6 +98,25 @@ export async function POST(req: NextRequest) {
             });
         }
 
+        // --- GENERATE IMAGE MODE ---
+        if (mode === 'generate-image') {
+            const imagePrompt = formData.get('image_prompt') as string;
+            const aspectRatio = (formData.get('aspectRatio') as string) || "3:4";
+
+            if (!imagePrompt) {
+                return NextResponse.json({ error: "Missing image prompt" }, { status: 400 });
+            }
+
+            const enhancedPrompt = `${imagePrompt}. Style: Modern, Minimalist, High Quality, 4k. Aspect Ratio ${aspectRatio}.`;
+            const imageUrl = await generateSlideImage(enhancedPrompt, aspectRatio);
+
+            if (!imageUrl) {
+                return NextResponse.json({ error: "Failed to generate image" }, { status: 500 });
+            }
+
+            return NextResponse.json({ image_url: imageUrl });
+        }
+
         // --- CREATE MODE ---
         let contextText = "";
         let contextImageParts: any[] = [];
@@ -214,11 +233,17 @@ export async function POST(req: NextRequest) {
         // 3. Generate Images for each slide (Parallel)
         // We limit to slideCount slides max to save resources/time
         const limitedSlides = slidesJson.slice(0, slideCount);
+        const skipImages = formData.get('skipImages') === 'true';
         
         const slidesWithImages = await Promise.all(limitedSlides.map(async (slide, index) => {
-            // Enhance prompt for consistency - use the actual aspect ratio
-            const enhancedPrompt = `${slide.image_prompt}. Style: Modern, Minimalist, High Quality, 4k. Aspect Ratio ${aspectRatio}.`;
-            const imageUrl = await generateSlideImage(enhancedPrompt, aspectRatio);
+            let imageUrl = null;
+            
+            if (!skipImages) {
+                // Enhance prompt for consistency - use the actual aspect ratio
+                const enhancedPrompt = `${slide.image_prompt}. Style: Modern, Minimalist, High Quality, 4k. Aspect Ratio ${aspectRatio}.`;
+                imageUrl = await generateSlideImage(enhancedPrompt, aspectRatio);
+            }
+
             return {
                 ...slide,
                 id: index,

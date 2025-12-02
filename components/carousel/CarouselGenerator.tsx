@@ -100,6 +100,36 @@ export function CarouselGenerator() {
     }
   }, []);
 
+  const generateImagesForSlides = async (slidesToProcess: SlideData[]) => {
+    for (let i = 0; i < slidesToProcess.length; i++) {
+      const slide = slidesToProcess[i];
+      try {
+        const formData = new FormData();
+        formData.append("mode", "generate-image");
+        formData.append("image_prompt", slide.image_prompt);
+        formData.append("aspectRatio", aspectRatio);
+
+        const res = await fetch("/api/generate-carousel", {
+          method: "POST",
+          body: formData
+        });
+        
+        const data = await res.json();
+        if (data.image_url) {
+          setSlides(prev => {
+            const newSlides = [...prev];
+            if (newSlides[i]) {
+              newSlides[i] = { ...newSlides[i], image_url: data.image_url };
+            }
+            return newSlides;
+          });
+        }
+      } catch (e) {
+        console.error(`Failed to generate image for slide ${i}`, e);
+      }
+    }
+  };
+
   const handleGenerate = async () => {
     setLoading(true);
     setSlides([]);
@@ -107,6 +137,7 @@ export function CarouselGenerator() {
     const formData = new FormData();
     formData.append("type", activeTab);
     formData.append("aspectRatio", aspectRatio);
+    formData.append("skipImages", "true");
 
     if (activeTab === "youtube") formData.append("url", youtubeUrl);
     else if (activeTab === "topic") {
@@ -124,14 +155,25 @@ export function CarouselGenerator() {
         body: formData,
       });
       
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await res.text();
+        console.error("API Error (Non-JSON):", text);
+        throw new Error("Server error. Please try again later.");
+      }
+
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       
       setSlides(data.slides);
+      setLoading(false);
+      
+      // Start generating images
+      generateImagesForSlides(data.slides);
+      
     } catch (error) {
       console.error(error);
       alert(error instanceof Error ? error.message : "Failed to generate carousel. Please try again.");
-    } finally {
       setLoading(false);
     }
   };

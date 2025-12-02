@@ -30,7 +30,8 @@ export const Slide = forwardRef<HTMLDivElement, SlideProps>(({
   return (
     <div ref={ref} className={cn("bg-white h-full w-full p-6 flex flex-col relative overflow-hidden shadow-sm border border-gray-100", className)} style={{ fontFamily }}>
       {/* Background Image */}
-      {slide.image_url && (
+      {/* Background Image */}
+      {slide.image_url ? (
         <div className="absolute inset-0 z-0">
           <img 
             src={slide.image_url} 
@@ -39,6 +40,10 @@ export const Slide = forwardRef<HTMLDivElement, SlideProps>(({
           />
           {/* Overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+        </div>
+      ) : (
+        <div className="absolute inset-0 z-0 bg-neutral-900 flex items-center justify-center">
+             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white opacity-50"></div>
         </div>
       )}
 
