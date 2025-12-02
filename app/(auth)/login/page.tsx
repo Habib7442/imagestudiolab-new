@@ -69,6 +69,7 @@ function LoginForm() {
               src="/logo.png" 
               alt="ImageStudioLab Logo" 
               fill
+              sizes="64px"
               className="object-cover"
             />
           </Link>

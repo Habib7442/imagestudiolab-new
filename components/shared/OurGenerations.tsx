@@ -2,49 +2,58 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const items = [
   {
     id: 1,
     src: "/our-generations/1.png",
     className: "md:col-span-2 md:row-span-2", // Big feature
+    sizes: "(max-width: 768px) 100vw, 66vw",
   },
   {
     id: 2,
     src: "/our-generations/2.png",
     className: "md:col-span-1 md:row-span-2", // Tall
+    sizes: "(max-width: 768px) 100vw, 33vw",
   },
   {
     id: 3,
     src: "/our-generations/3.png",
     className: "md:col-span-1 md:row-span-1",
+    sizes: "(max-width: 768px) 100vw, 33vw",
   },
   {
     id: 4,
     src: "/our-generations/4.png",
     className: "md:col-span-1 md:row-span-1",
+    sizes: "(max-width: 768px) 100vw, 33vw",
   },
   {
     id: 5,
     src: "/our-generations/5.png",
     className: "md:col-span-1 md:row-span-1", 
+    sizes: "(max-width: 768px) 100vw, 33vw",
   },
   {
     id: 6,
     src: "/our-generations/6.png",
     className: "md:col-span-3 md:row-span-1", // Full width to fill gap
+    sizes: "(max-width: 768px) 100vw, 100vw",
   },
   {
     id: 7,
     src: "/our-generations/7.png",
     className: "md:col-span-3 md:row-span-2", // Ultra Wide Feature
+    sizes: "(max-width: 768px) 100vw, 100vw",
   },
   {
     id: 8,
     src: "/our-generations/carousel-card.png", // You'll need to ensure this image exists or use a placeholder
     className: "md:col-span-3 md:row-span-1 bg-gradient-to-r from-purple-900/50 to-pink-900/50 border-fuchsia-500/30", 
     title: "AI Carousel Maker",
-    link: "/carousel"
+    link: "/carousel",
+    sizes: "100vw"
   },
 ];
 
@@ -107,10 +116,12 @@ export default function OurGenerations() {
                 </a>
             ) : (
                 <>
-                    <img 
-                    src={item.src} 
-                    alt={`Generation ${item.id}`}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    <Image 
+                      src={item.src} 
+                      alt={`Generation ${item.id}`}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      sizes={item.sizes}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
                     

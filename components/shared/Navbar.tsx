@@ -75,6 +75,7 @@ export default function Navbar({ actionButton }: NavbarProps) {
               src="/logo.png" 
               alt="ImageStudioLab" 
               fill 
+              sizes="32px"
               className="object-cover"
             />
           </div>

@@ -105,6 +105,7 @@ export default function Hero() {
                src="/logo.png" 
                alt="ImageStudioLab Logo" 
                fill
+               sizes="96px"
                className="object-cover"
              />
           </div>

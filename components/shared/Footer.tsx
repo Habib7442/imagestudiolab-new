@@ -39,6 +39,7 @@ export default function Footer() {
                   src="/logo.png" 
                   alt="ImageStudioLab Logo" 
                   fill
+                  sizes="32px"
                   className="object-cover"
                 />
               </div>
