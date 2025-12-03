@@ -388,7 +388,7 @@ export function CarouselGenerator() {
       aspectRatio
     };
     localStorage.setItem('carouselState', JSON.stringify(stateToSave));
-    router.push('/login');
+    router.push('/login?returnTo=/carousel');
   };
 
   return (
