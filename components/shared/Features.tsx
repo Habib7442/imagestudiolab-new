@@ -7,7 +7,7 @@ const features = [
   {
     icon: Wand2,
     title: "AI-Powered Magic",
-    desc: "Generate professional photoshoots and thumbnails in seconds using state-of-the-art AI models."
+    desc: "Generate professional photoshoots in seconds using state-of-the-art AI models."
   },
   {
     icon: Zap,

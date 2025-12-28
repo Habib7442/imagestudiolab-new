@@ -47,14 +47,7 @@ const items = [
     className: "md:col-span-3 md:row-span-2", // Ultra Wide Feature
     sizes: "(max-width: 768px) 100vw, 100vw",
   },
-  {
-    id: 8,
-    src: "/our-generations/carousel-card.png", // You'll need to ensure this image exists or use a placeholder
-    className: "md:col-span-3 md:row-span-1 bg-gradient-to-r from-purple-900/50 to-pink-900/50 border-fuchsia-500/30", 
-    title: "AI Carousel Maker",
-    link: "/carousel",
-    sizes: "100vw"
-  },
+
 ];
 
 export default function OurGenerations() {
@@ -93,46 +86,28 @@ export default function OurGenerations() {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[250px]">
         {items.map((item, i) => (
-          <motion.div
+          <div
             key={item.id}
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: i * 0.05 }}
-            viewport={{ once: true }}
-            whileHover={{ scale: 1.02 }}
             className={cn(
-              "relative rounded-2xl overflow-hidden group border border-white/10 bg-[#111] shadow-2xl",
+              "relative rounded-2xl overflow-hidden group border border-white/10 bg-[#111] shadow-2xl transition-transform hover:scale-[1.02] duration-500",
               item.className
             )}
           >
-            {item.title ? (
-                <a href={item.link} className="block w-full h-full relative overflow-hidden flex items-center justify-center">
-                    <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-600/20 to-purple-600/20 z-0" />
-                    <div className="relative z-10 text-center p-8">
-                        <h3 className="text-3xl md:text-4xl font-bold text-white mb-2">{item.title}</h3>
-                        <p className="text-neutral-300">Create viral carousels in seconds →</p>
-                    </div>
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
-                </a>
-            ) : (
-                <>
-                    <Image 
-                      src={item.src} 
-                      alt={`Generation ${item.id}`}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      sizes={item.sizes}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-                    
-                    <div className="absolute bottom-4 left-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    <div className="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full">
-                        <span className="text-xs font-medium text-white">Generated with AI</span>
-                    </div>
-                    </div>
-                </>
-            )}
-          </motion.div>
+              <Image 
+                src={item.src} 
+                alt={`Generation ${item.id}`}
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                sizes={item.sizes}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+              
+              <div className="absolute bottom-4 left-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full">
+                  <span className="text-xs font-medium text-white">Generated with AI</span>
+              </div>
+              </div>
+          </div>
         ))}
       </div>
     </section>

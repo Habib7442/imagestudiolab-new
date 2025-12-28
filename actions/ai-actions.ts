@@ -116,78 +116,7 @@ export async function generateImageEdit(imageBase64: string, prompt: string) {
   }
 }
 
-export async function generateThumbnail(
-  imageBase64: string, 
-  prompt: string, 
-  aspectRatio: string = "16:9",
-  referenceImageBase64?: string
-) {
-  try {
-    const base64Data = imageBase64.split(",")[1] || imageBase64;
-    
-    const parts: any[] = [
-      { text: prompt },
-      {
-        inlineData: {
-          mimeType: "image/jpeg",
-          data: base64Data,
-        },
-      },
-    ];
 
-    if (referenceImageBase64) {
-      const referenceData = referenceImageBase64.split(",")[1] || referenceImageBase64;
-      parts.push({
-        inlineData: {
-          mimeType: "image/jpeg",
-          data: referenceData,
-        },
-      });
-      parts[0].text += " Use the second image as a style reference.";
-    }
-
-    const response = await ai.models.generateContent({
-      model: "gemini-3-pro-image-preview",
-      contents: [
-        {
-          parts: parts,
-        },
-      ],
-      config: {
-        responseModalities: ["TEXT", "IMAGE"],
-        // @ts-ignore - Types might not be updated yet
-        imageConfig: {
-          aspectRatio: aspectRatio,
-        }
-      } as any
-    });
-
-    if (response.candidates && response.candidates[0]?.content?.parts) {
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData && part.inlineData.data) {
-          return `data:image/png;base64,${part.inlineData.data}`;
-        }
-      }
-    }
-    
-    throw new Error("No image data in response");
-  } catch (error: any) {
-    console.error("Thumbnail Generation Error:", error);
-    
-    // Provide user-friendly error messages
-    if (error?.status === 503) {
-      throw new Error("The AI service is currently overloaded. Please try again in a few moments.");
-    } else if (error?.status === 429) {
-      throw new Error("Too many requests. Please wait a moment before trying again.");
-    } else if (error?.message?.includes("quota")) {
-      throw new Error("API quota exceeded. Please try again later.");
-    }
-    
-    // Always throw a simple Error with a string message for proper serialization
-    const errorMessage = error?.message || error?.toString() || "Failed to generate thumbnail";
-    throw new Error(errorMessage);
-  }
-}
 
 export async function generateImageFromPrompt(prompt: string, aspectRatio: string = "1:1") {
   try {

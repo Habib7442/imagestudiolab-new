@@ -5,7 +5,6 @@ import { Twitter, Instagram, Github, Linkedin } from "lucide-react";
 const footerLinks = {
   product: [
     { name: "AI Photoshoot", href: "/photoshoot" },
-    { name: "Thumbnail Gen", href: "/thumbnail-gen" },
     { name: "Nano Banana Wall", href: "/nano-banana-wall" },
     { name: "Pricing", href: "#" },
   ],
