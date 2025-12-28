@@ -53,12 +53,30 @@ export default function MusicTrendingInterface() {
   const router = useRouter();
 
   // Check authentication status
+  // Check authentication status & restore state
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuthAndRestore = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsLoggedIn(!!session);
+
+      // Restore state if returning from login (or just page reload if persisted)
+      const savedState = localStorage.getItem('music_trend_state');
+      if (savedState) {
+        try {
+          const parsed = JSON.parse(savedState);
+          if (parsed.userImage) setUserImage(parsed.userImage);
+          if (parsed.playlistImage) setPlaylistImage(parsed.playlistImage);
+          if (parsed.selectedTemplate) setSelectedTemplate(parsed.selectedTemplate);
+          if (parsed.generatedImage) setGeneratedImage(parsed.generatedImage);
+          
+          // Clear state after restoring to avoid sticking
+          localStorage.removeItem('music_trend_state');
+        } catch (e) {
+          console.error("Failed to restore state", e);
+        }
+      }
     };
-    checkAuth();
+    checkAuthAndRestore();
   }, [supabase.auth]);
 
   // Restore state logic dropped for simplicity in this new component, 
@@ -162,6 +180,14 @@ export default function MusicTrendingInterface() {
   };
 
   const handleLoginRedirect = () => {
+    // Save state before redirecting
+    const stateToSave = {
+      userImage,
+      playlistImage,
+      selectedTemplate,
+      generatedImage
+    };
+    localStorage.setItem('music_trend_state', JSON.stringify(stateToSave));
     router.push('/login');
   };
 
