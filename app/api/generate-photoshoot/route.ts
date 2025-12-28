@@ -20,6 +20,8 @@ export async function POST(req: NextRequest) {
 
     const mode = formData.get("mode") as string || "creative";
 
+    const negativePrompt = formData.get("negativePrompt") as string || "";
+
     // Convert User Image to Base64
     const userImageBuffer = await userImage.arrayBuffer();
     const userImageBase64 = Buffer.from(userImageBuffer).toString("base64");
@@ -35,22 +37,24 @@ export async function POST(req: NextRequest) {
     if (productImageBase64) {
       if (mode === "try-on") {
         productInstruction = "The second image provided is a CLOTHING ITEM. You must dress the USER (first image) in this EXACT clothing item. Replace the user's current outfit with this new one, fitting it perfectly to their body pose. Maintain the fabric texture and details of the clothing item.";
+      } else if (mode === "trending-music") {
+        productInstruction = "The second image provided is a REFERENCE UI (Spotify Playlist). You must recreate a similar high-resolution, READABLE music interface in the background. The text (song names, artists) MUST be distinct and legible. Do NOT blur the text. The interface should look like a sharp desktop screen or projection behind the subject.";
       } else {
         productInstruction = "The second image provided is a PRODUCT. Integrate this product naturally into the scene.";
       }
     }
 
     const finalPrompt = `
-    Task: Generate a high-quality, photorealistic photoshoot image.
-    Style Filter: ${filter} (Apply this aesthetic strongly).
-    User Request: ${prompt}
+    Task: ${mode === "trending-music" ? "Generate a viral, cinematic social media image (Vertical 9:16)." : "Generate a high-quality, photorealistic photoshoot image."}
+    Style Filter: ${filter} ${filter !== "none" ? "(Apply this aesthetic strongly)" : ""}
+    User Request/Prompt: ${prompt}
     
     CRITICAL INSTRUCTIONS:
     1. The first image provided is the USER. You MUST preserve their facial features, identity, and likeness exactly. Do not change their face.
     2. ${productInstruction}
-    3. The output must be a 1:1 aspect ratio image.
-    4. Make it look like a professional photoshoot. High end, sexy, aesthetic.
-    5. Ensure the lighting and composition match the requested "${filter}" style.
+    3. ${mode === "trending-music" ? "The output must be a 9:16 aspect ratio vertical image. Focus on high-contrast, editorial lighting." : "The output must be a 1:1 aspect ratio image."}
+    4. ${mode === "trending-music" ? "ENSURE TEXT ON THE UI BACKGROUND IS SHARP AND READABLE. NO MOTION BLUR ON THE SCREEN." : "Make it look like a professional photoshoot. High end, sexy, aesthetic."}
+    5. ${negativePrompt ? `NEGATIVE PROMPT (Do NOT include): ${negativePrompt}` : ""}
     `;
 
     const contentParts: any[] = [{ text: finalPrompt }];
@@ -71,13 +75,15 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    const aspectRatio = mode === "trending-music" ? "9:16" : "1:1";
+
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-image-preview", 
       contents: contentParts,
       config: {
         responseModalities: ["TEXT", "IMAGE"],
         imageConfig: { 
-          aspectRatio: "1:1",
+          aspectRatio: aspectRatio,
           imageSize: "2K"
         }
       } as any

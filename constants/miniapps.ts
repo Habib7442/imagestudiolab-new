@@ -42,4 +42,14 @@ export const MINI_APPS: MiniApp[] = [
     color: "#EC4899",
     gradient: "from-pink-500 to-rose-500",
   },
+  {
+    id: "viral-trends",
+    name: "Viral Trends",
+    description: "Join the latest viral AI trends. Create stunning visuals for music, reels, and social media challenges.",
+    href: "/trendings/music",
+    icon: "🔥",
+    status: "live",
+    color: "#FF5500",
+    gradient: "from-orange-500 to-red-600",
+  },
 ];

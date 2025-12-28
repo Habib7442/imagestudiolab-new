@@ -7,47 +7,64 @@ import Image from "next/image";
 const items = [
   {
     id: 1,
-    src: "/our-generations/1.png",
-    className: "md:col-span-2 md:row-span-2", // Big feature
+    src: "/trendings/music/confident-night-listener.png",
+    className: "md:col-span-2 md:row-span-2", 
     sizes: "(max-width: 768px) 100vw, 66vw",
   },
   {
     id: 2,
-    src: "/our-generations/2.png",
-    className: "md:col-span-1 md:row-span-2", // Tall
+    src: "/trendings/music/soft-glow.png",
+    className: "md:col-span-1 md:row-span-2", 
     sizes: "(max-width: 768px) 100vw, 33vw",
   },
   {
     id: 3,
-    src: "/our-generations/3.png",
+    src: "/trendings/music/spotify-after-dark.png",
     className: "md:col-span-1 md:row-span-1",
     sizes: "(max-width: 768px) 100vw, 33vw",
   },
   {
     id: 4,
-    src: "/our-generations/4.png",
+    src: "/trendings/music/reel-hero.png",
     className: "md:col-span-1 md:row-span-1",
     sizes: "(max-width: 768px) 100vw, 33vw",
   },
   {
     id: 5,
-    src: "/our-generations/5.png",
+    src: "/trendings/music/minimal-sexy-campaign.png",
     className: "md:col-span-1 md:row-span-1", 
     sizes: "(max-width: 768px) 100vw, 33vw",
   },
   {
     id: 6,
-    src: "/our-generations/6.png",
-    className: "md:col-span-3 md:row-span-1", // Full width to fill gap
-    sizes: "(max-width: 768px) 100vw, 100vw",
+    src: "/trendings/music/magical-moment-freeze.png",
+    className: "md:col-span-2 md:row-span-1", 
+    sizes: "(max-width: 768px) 100vw, 66vw",
   },
   {
     id: 7,
-    src: "/our-generations/7.png",
-    className: "md:col-span-3 md:row-span-2", // Ultra Wide Feature
+    src: "/trendings/music/confident-creator-vibe.png",
+    className: "md:col-span-1 md:row-span-1",
+    sizes: "(max-width: 768px) 100vw, 33vw",
+  },
+  {
+    id: 8,
+    src: "/trendings/music/editorial-music-poster.png",
+    className: "md:col-span-1 md:row-span-2",
+    sizes: "(max-width: 768px) 100vw, 33vw",
+  },
+  {
+    id: 9,
+    src: "/trendings/music/spotify-icon-moment.png",
+    className: "md:col-span-2 md:row-span-2",
+    sizes: "(max-width: 768px) 100vw, 66vw",
+  },
+  {
+    id: 10,
+    src: "/trendings/music/calm.png",
+    className: "md:col-span-3 md:row-span-1",
     sizes: "(max-width: 768px) 100vw, 100vw",
   },
-
 ];
 
 export default function OurGenerations() {
