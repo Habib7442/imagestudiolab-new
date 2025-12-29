@@ -150,3 +150,46 @@ export async function generateImageFromPrompt(prompt: string, aspectRatio: strin
     throw error;
   }
 }
+
+export async function generateSocialCaptions(topic: string, details: string) {
+  try {
+    const prompt = `
+      You are a viral social media manager.
+      Generate 3 distinct captions for an infographic about "${topic}".
+      
+      Context/Details provided: "${details || "General educational content about " + topic}"
+
+      1. **LinkedIn**: Professional, educational, insightful. Use bullet points if needed. 3-5 hashtags.
+      2. **Instagram**: Engaging, short, punchy. Use emojis. 5-10 relevant hashtags.
+      3. **Twitter (X)**: Short, controversial or hook-based. Under 280 chars. 2-3 hashtags.
+
+      Return ONLY a valid JSON object with keys: "linkedin", "instagram", "twitter".
+    `;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3-pro-preview",
+      contents: [{ parts: [{ text: prompt }] }],
+    });
+
+    let text = typeof (response as any).text === 'function' ? (response as any).text() : response.text;
+    
+    // Clean up markdown
+    let jsonString = text?.replace(/```json\n?|```/g, "").trim();
+    const start = jsonString?.indexOf('{');
+    const end = jsonString?.lastIndexOf('}');
+    if (start !== undefined && start !== -1 && end !== undefined && end !== -1) {
+      jsonString = jsonString.substring(start, end + 1);
+    }
+
+    if (!jsonString) throw new Error("No text response");
+
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error("Caption Gen Error:", error);
+    return {
+      linkedin: `Here is a breakdown of ${topic}. #education #learning #growth`,
+      instagram: `Master ${topic} with this guide! 🚀✨ #${topic.replace(/\s/g, '')} #learning`,
+      twitter: `Everything you need to know about ${topic}. 👇 #${topic.replace(/\s/g, '')}`
+    };
+  }
+}

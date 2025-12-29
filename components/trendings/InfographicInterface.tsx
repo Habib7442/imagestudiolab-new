@@ -8,6 +8,7 @@ import Navbar from "@/components/shared/Navbar";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { INFOGRAPHIC_TEMPLATES, InfographicTemplate } from "@/constants/infographics";
+import { generateSocialCaptions } from "@/actions/ai-actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -194,7 +195,7 @@ export default function InfographicInterface() {
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   placeholder="e.g. 'Camera Parts', 'How to make Coffee', 'Benefits of Yoga'..."
-                  className="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 text-lg text-white placeholder:text-neutral-600 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all min-h-[80px] resize-none"
+                  className="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 text-lg text-white placeholder:text-neutral-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all min-h-[80px] resize-none"
                 />
               </div>
             </div>
@@ -210,7 +211,7 @@ export default function InfographicInterface() {
                   value={userContent}
                   onChange={(e) => setUserContent(e.target.value)}
                   placeholder="e.g. List specific steps, facts, or comparison points you want to include..."
-                  className="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 text-base text-white placeholder:text-neutral-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all min-h-[100px] resize-none"
+                  className="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 text-base text-white placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all min-h-[100px] resize-none"
                 />
               </div>
             </div>
@@ -280,8 +281,8 @@ export default function InfographicInterface() {
 
           </div>
 
-          {/* Right Panel: Preview */}
-          <div className="lg:col-span-7">
+            {/* Right Panel: Preview */}
+            <div className="lg:col-span-7 space-y-6">
             <div className="sticky top-8">
               <div className="aspect-[9/16] w-full max-w-sm mx-auto rounded-3xl bg-[#111] border border-white/10 overflow-hidden relative flex items-center justify-center shadow-2xl">
                 
@@ -305,13 +306,6 @@ export default function InfographicInterface() {
                           Download HD
                         </button>
                       </div>
-                      
-                      {/* Watermark Overlay (Visual only, actual is baked in) */}
-                      {/* <div className="absolute bottom-2 left-0 right-0 text-center pointer-events-none opacity-50">
-                        <span className="text-[10px] font-medium text-white/50 backdrop-blur-md px-2 py-0.5 rounded-full bg-black/20">
-                          Created by ImageStudioLab
-                        </span>
-                      </div> */}
                     </motion.div>
                   ) : (
                     <motion.div
@@ -339,8 +333,14 @@ export default function InfographicInterface() {
                   </div>
                 )}
               </div>
+              
+              {/* Caption Generator */}
+              {generatedImage && !isGenerating && (
+                 <CaptionsGenerator topic={topic} userContent={userContent} />
+              )}
+
             </div>
-          </div>
+            </div>
 
         </div>
       </div>
@@ -371,3 +371,86 @@ export default function InfographicInterface() {
     </div>
   );
 }
+
+function CaptionsGenerator({ topic, userContent }: { topic: string, userContent: string }) {
+  const [captions, setCaptions] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleGen = async () => {
+    setLoading(true);
+    try {
+      const res = await generateSocialCaptions(topic, userContent);
+      setCaptions(res);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-[#111] border border-white/10 rounded-2xl p-6 mt-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-2">
+          <span className="text-base">💬</span> Viral Captions
+        </h3>
+        {!captions && (
+          <button 
+            onClick={handleGen}
+            disabled={loading}
+            className="text-xs font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1"
+          >
+            {loading ? <Loader2 className="w-3 h-3 animate-spin"/> : <Sparkles className="w-3 h-3" />}
+            {loading ? "Writing..." : "Auto-Write"}
+          </button>
+        )}
+      </div>
+
+      {loading && !captions && (
+        <div className="space-y-3 animate-pulse">
+           <div className="h-4 bg-white/5 rounded w-3/4" />
+           <div className="h-4 bg-white/5 rounded w-1/2" />
+        </div>
+      )}
+
+      {captions && (
+        <div className="space-y-4">
+          <CaptionBlock platform="LinkedIn" icon="💼" text={captions.linkedin} />
+          <CaptionBlock platform="Instagram" icon="📸" text={captions.instagram} />
+          <CaptionBlock platform="X (Twitter)" icon="🐦" text={captions.twitter} />
+          
+          <button onClick={handleGen} className="w-full text-center text-xs text-neutral-500 hover:text-neutral-300 mt-2">
+            Regenerate Captions
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const CaptionBlock = ({ platform, icon, text }: { platform: string, icon: string, text: string }) => {
+  const [copied, setCopied] = useState(false);
+  
+  const copy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="bg-black/50 rounded-xl p-3 border border-white/5 relative group">
+       <div className="flex items-center gap-2 text-xs font-bold text-neutral-400 mb-2">
+         <span>{icon}</span> {platform}
+       </div>
+       <p className="text-sm text-neutral-300 whitespace-pre-line leading-relaxed pb-6 min-h-[60px]">
+         {text}
+       </p>
+       <button 
+         onClick={copy}
+         className="absolute bottom-2 right-2 px-2 py-1 rounded-lg bg-white/10 text-[10px] font-bold text-neutral-400 hover:bg-white/20 hover:text-white transition-colors flex items-center gap-1"
+       >
+         {copied ? "Copied!" : "Copy"}
+       </button>
+    </div>
+  );
+};
