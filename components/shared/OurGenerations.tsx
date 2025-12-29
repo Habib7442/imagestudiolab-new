@@ -7,63 +7,51 @@ import Image from "next/image";
 const items = [
   {
     id: 1,
-    src: "/trendings/music/confident-night-listener.png",
+    src: "/infographics/infographic--1766983210603.png",
     className: "md:col-span-2 md:row-span-2", 
     sizes: "(max-width: 768px) 100vw, 66vw",
   },
   {
     id: 2,
-    src: "/trendings/music/soft-glow.png",
+    src: "/infographics/infographic-NIGHT-HABITS-RUINING-1766980164860.png",
     className: "md:col-span-1 md:row-span-2", 
     sizes: "(max-width: 768px) 100vw, 33vw",
   },
   {
     id: 3,
-    src: "/trendings/music/spotify-after-dark.png",
+    src: "/infographics/infographic-NIGHT-HABITS-RUINING-1766980698426.png",
     className: "md:col-span-1 md:row-span-1",
     sizes: "(max-width: 768px) 100vw, 33vw",
   },
   {
     id: 4,
-    src: "/trendings/music/reel-hero.png",
+    src: "/infographics/infographic-Night-Habits-Ruining-1766979675001.png",
     className: "md:col-span-1 md:row-span-1",
     sizes: "(max-width: 768px) 100vw, 33vw",
   },
   {
     id: 5,
-    src: "/trendings/music/minimal-sexy-campaign.png",
+    src: "/infographics/infographic-SITTING-POSITION-WHI-1766978965263.png",
     className: "md:col-span-1 md:row-span-1", 
     sizes: "(max-width: 768px) 100vw, 33vw",
   },
   {
     id: 6,
-    src: "/trendings/music/magical-moment-freeze.png",
+    src: "/infographics/infographic-SITTING-POSITION-WHI-1766979080764.png",
     className: "md:col-span-2 md:row-span-1", 
     sizes: "(max-width: 768px) 100vw, 66vw",
   },
   {
     id: 7,
-    src: "/trendings/music/confident-creator-vibe.png",
-    className: "md:col-span-1 md:row-span-1",
-    sizes: "(max-width: 768px) 100vw, 33vw",
-  },
-  {
-    id: 8,
-    src: "/trendings/music/editorial-music-poster.png",
+    src: "/infographics/infographic-WHY-BRANDS-NEED-A-WE-1766978686121.png",
     className: "md:col-span-1 md:row-span-2",
     sizes: "(max-width: 768px) 100vw, 33vw",
   },
   {
-    id: 9,
-    src: "/trendings/music/spotify-icon-moment.png",
+    id: 8,
+    src: "/infographics/infographic-WHY-BRANDS-NEED-A-WE-1766978750508.png",
     className: "md:col-span-2 md:row-span-2",
     sizes: "(max-width: 768px) 100vw, 66vw",
-  },
-  {
-    id: 10,
-    src: "/trendings/music/calm.png",
-    className: "md:col-span-3 md:row-span-1",
-    sizes: "(max-width: 768px) 100vw, 100vw",
   },
 ];
 

@@ -193,3 +193,33 @@ export async function generateSocialCaptions(topic: string, details: string) {
     };
   }
 }
+
+export async function generateInfographicContent(topic: string) {
+  try {
+    const prompt = `
+      You are an expert educational content strategist.
+      Create a detailed, high-value visual outline for an infographic about: "${topic}".
+      
+      Structure the content strictly as follows:
+      1. **Headline**: Catchy title.
+      2. **Key Points**: 3-5 distinct, actionable steps or facts.
+      3. **Visual Cues**: Brief description of what image/icon represents each point.
+      4. **Summary**: A one-sentence takeaway.
+      
+      Keep it concise (fit for a single graphical page).
+      Format as plain text with clear headings.
+      Do not use markdown bolding too excessively, just clean text.
+    `;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3-pro-preview",
+      contents: [{ parts: [{ text: prompt }] }],
+    });
+
+    const text = typeof (response as any).text === 'function' ? (response as any).text() : response.text;
+    return text || "Failed to generate content.";
+  } catch (error) {
+    console.error("Content Gen Error:", error);
+    return "Error generating content. Please try again or type manually.";
+  }
+}

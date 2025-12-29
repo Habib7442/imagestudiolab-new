@@ -33,19 +33,17 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL("https://imagestudiolab.com"),
   title: {
-    default: "ImageStudioLab - AI Photoshoot & Viral Trends Studio",
+    default: "ImageStudioLab - AI Infographic Generator",
     template: "%s | ImageStudioLab",
   },
-  description: "The ultimate AI creative suite. Generate professional AI headshots, try on virtual outfits, and create viral music trend visuals for social media. No design skills needed.",
+  description: "The ultimate AI Infographic suite. Turn topics and product photos into viral vertical infographics in seconds.",
   keywords: [
-    "AI photoshoot", 
-    "professional headshots", 
-    "virtual try-on", 
-    "fashion AI", 
-    "viral music trends", 
-    "spotify visualizer", 
-    "social media content creator", 
-    "AI image generator", 
+    "AI infographic", 
+    "infographic generator", 
+    "visual content", 
+    "social media graphics", 
+    "product showcase", 
+    "educational visuals", 
     "ImageStudioLab"
   ],
   authors: [{ name: "ImageStudioLab Team" }],
@@ -55,8 +53,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://imagestudiolab.com",
-    title: "ImageStudioLab - AI Photoshoot & Viral Trends Studio",
-    description: "Generate professional headshots, try on outfits virtually, and create viral social media visuals with AI. The next-gen creative studio.",
+    title: "ImageStudioLab - AI Infographic Generator",
+    description: "Turn topics and products into stunning infographics instantly with AI.",
     siteName: "ImageStudioLab",
     images: [
       {

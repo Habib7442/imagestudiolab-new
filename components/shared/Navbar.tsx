@@ -55,7 +55,7 @@ export default function Navbar({ actionButton }: NavbarProps) {
     router.push('/');
   };
 
-  const isOnAppPage = pathname === '/photoshoot' || pathname === '/thumbnail-gen';
+  const isOnAppPage = pathname.startsWith('/create');
 
   return (
     <motion.nav 
@@ -93,15 +93,7 @@ export default function Navbar({ actionButton }: NavbarProps) {
             Testimonials
             <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[var(--color-brand-red)] transition-all duration-300 group-hover:w-full" />
           </Link>
-          <div className="relative group">
-            <Link 
-              href="/nano-banana-wall" 
-              className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1"
-            >
-              <span className="text-yellow-400">🍌</span> Nano Banana Wall
-            </Link>
-            <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-yellow-400 transition-all duration-300 group-hover:w-full" />
-          </div>
+
         </div>
 
         {/* Desktop Auth Buttons */}
@@ -139,7 +131,7 @@ export default function Navbar({ actionButton }: NavbarProps) {
               </Button>
               {!isOnAppPage && !actionButton && (
                 <Button asChild size="sm" className="bg-[var(--color-brand-red)] hover:bg-red-600 text-white shadow-[0_0_15px_rgba(255,51,51,0.3)] hover:shadow-[0_0_25px_rgba(255,51,51,0.5)] border-none">
-                  <Link href="/photoshoot">
+                  <Link href="/create/topic">
                     Get Started
                   </Link>
                 </Button>
@@ -176,13 +168,7 @@ export default function Navbar({ actionButton }: NavbarProps) {
             >
               Testimonials
             </Link>
-            <Link
-              href="/nano-banana-wall"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block text-neutral-400 hover:text-white transition-colors py-2 flex items-center gap-2"
-            >
-              <span className="text-yellow-400">🍌</span> Nano Banana Wall
-            </Link>
+
             
             <div className="pt-4 border-t border-white/10 space-y-3">
               {isLoggedIn ? (
@@ -221,7 +207,7 @@ export default function Navbar({ actionButton }: NavbarProps) {
                       className="w-full bg-[var(--color-brand-red)] hover:bg-red-600 text-white"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      <Link href="/photoshoot">Get Started</Link>
+                      <Link href="/create/topic">Get Started</Link>
                     </Button>
                   )}
                 </>

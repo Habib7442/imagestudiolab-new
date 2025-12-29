@@ -148,3 +148,105 @@ export const INFOGRAPHIC_TEMPLATES: InfographicTemplate[] = [
     `
   }
 ];
+
+export const PRODUCT_TEMPLATES: InfographicTemplate[] = [
+  {
+    id: "feature-spotlight",
+    name: "Feature Spotlight",
+    description: "Highlight key product features with sleek callouts and zoomed-in details.",
+    icon: "🔍",
+    gradient: "from-blue-600 to-cyan-500",
+    prompt: `
+      Product Feature Spotlight Infographic (Portrait 3:4).
+      
+      **Centerpiece:**
+      The provided product images are the HERO. Place the main product centrally.
+      Ensure it looks premium, well-lit, and high-fidelity.
+      
+      **Layout:**
+      "Apple-style" clean breakdown.
+      3-4 Sleek lines connecting specific parts of the product to floating text bubbles.
+      Each bubble highlights a key benefit (Durability, Design, Tech).
+      
+      [USER_CONTENT_BLOCK]
+      
+      **Style:**
+      Minimalist, premium tech aesthetic. 
+      Soft gradient background that complements the product colors.
+      Bold modern typography.
+    `
+  },
+  {
+    id: "seasonal-promo",
+    name: "Seasonal Sale / Promo",
+    description: "Eye-catching promotional layout with 'Sale' tags and price focus.",
+    icon: "🏷️",
+    gradient: "from-red-500 to-pink-600",
+    prompt: `
+      High-Energy Promotional Ad Design (Portrait 3:4).
+      
+      **Visuals:**
+      Showcase the products dynamically (angled or flying).
+      Add "Limited Offer" or "Sale" ribbons/badges that look 3D and premium.
+      
+      [USER_CONTENT_BLOCK]
+      
+      **Layout:**
+      Bold, large typography for the Offer (e.g., "50% OFF").
+      Dynamic background patterns (confetti, abstract shapes) but kept subtle behind the products.
+      Call to Action button visual at the bottom.
+      
+      **Style:**
+      Vibrant, commercial, excitement-inducing.
+    `
+  },
+  {
+    id: "collection-grid",
+    name: "Collection Grid",
+    description: "Display multiple products in a clean, editorial grid layout.",
+    icon: "🍱",
+    gradient: "from-emerald-500 to-green-600",
+    prompt: `
+      Editorial Fashion/Product Grid Layout (Portrait 3:4).
+      
+      **Layout:**
+      A modern, asymmetrical or symmetrical grid displaying the provided product images.
+      Think "Lookbook" or "Magazine Spread".
+      
+      [USER_CONTENT_BLOCK]
+      
+      **Details:**
+      Small minimal labels below each product item.
+      "Collection Name" [TOPIC] header in elegant serif font.
+      
+      **Style:**
+      Clean, white-space heavy (or dark mode equivalent), sophisticated.
+      Focus purely on the products.
+    `
+  },
+  {
+    id: "vs-competitor",
+    name: "Us vs Them",
+    description: "Superiority comparison showing why your product wins.",
+    icon: "🆚",
+    gradient: "from-violet-600 to-purple-600",
+    prompt: `
+      "Us vs Them" Product Comparison (Portrait 3:4).
+      
+      **Layout:**
+      Split screen. 
+      Left Side (Your Product): Bright, Glorious, Halo effect. Labeled "[TOPIC]".
+      Right Side (Generic Competitor): Dull, grayscale, generic shape. Labeled "Others".
+      
+      [USER_CONTENT_BLOCK]
+      
+      **Checklist:**
+      A list of features below. 
+      Your side has all Green Checkmarks ✅.
+      Competitor side has Red Crosses ❌.
+      
+      **Style:**
+      Persuasive, high-contrast, marketing-focused.
+    `
+  }
+];

@@ -2,13 +2,14 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Loader2, Download, Search, Layout, Type, Palette, Wand2, Lightbulb, AlertCircle } from "lucide-react";
+import { Sparkles, Loader2, Download, Search, Layout, Type, Palette, Wand2, Lightbulb, AlertCircle, Plus, X, Image as ImageIcon, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/shared/Navbar";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { INFOGRAPHIC_TEMPLATES, InfographicTemplate } from "@/constants/infographics";
-import { generateSocialCaptions } from "@/actions/ai-actions";
+import { INFOGRAPHIC_TEMPLATES, PRODUCT_TEMPLATES, InfographicTemplate } from "@/constants/infographics";
+import { generateSocialCaptions, generateInfographicContent } from "@/actions/ai-actions";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,14 +24,24 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function InfographicInterface() {
+  const [activeTab, setActiveTab] = useState("topic");
   const [topic, setTopic] = useState("");
   const [userContent, setUserContent] = useState("");
+  
+  // Product Mode State
+  const [productImages, setProductImages] = useState<File[]>([]);
+  const [brandName, setBrandName] = useState("");
+
   const [selectedTemplate, setSelectedTemplate] = useState<InfographicTemplate | null>(INFOGRAPHIC_TEMPLATES[0]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedTemplate(activeTab === 'product' ? PRODUCT_TEMPLATES[0] : INFOGRAPHIC_TEMPLATES[0]);
+  }, [activeTab]);
 
   const supabase = createClient();
   const router = useRouter();
@@ -67,9 +78,24 @@ export default function InfographicInterface() {
     return () => subscription.unsubscribe();
   }, [supabase.auth]);
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      setProductImages(prev => [...prev, ...newFiles].slice(0, 3));
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setProductImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleGenerate = async () => {
-    if (!topic.trim()) {
+    if (activeTab === "topic" && !topic.trim()) {
       setError("Please describe a topic for your infographic!");
+      return;
+    }
+    if (activeTab === "product" && productImages.length === 0) {
+      setError("Please upload at least one product image!");
       return;
     }
     if (!selectedTemplate) {
@@ -82,21 +108,48 @@ export default function InfographicInterface() {
     setError(null);
 
     try {
-      // Inject user's topic and content into the template prompt
-      let finalPrompt = selectedTemplate.prompt.replaceAll("[TOPIC]", topic);
-      
-      let contentBlock = "";
-      if (userContent.trim()) {
-         contentBlock = "**Detailed Content Instructions (Strictly follow these):**\n" + userContent;
-      } else {
-         contentBlock = "**Detailed Content Instructions:**\nAuto-generate relevant, accurate, and high-value educational content based on the topic.";
-      }
-      
-      finalPrompt = finalPrompt.replace("[USER_CONTENT_BLOCK]", contentBlock);
-
       const formData = new FormData();
-      formData.append("prompt", finalPrompt);
-      formData.append("mode", "infographic"); 
+
+      if (activeTab === "topic") {
+        let finalPrompt = selectedTemplate.prompt.replaceAll("[TOPIC]", topic);
+        let contentBlock = "";
+        if (userContent.trim()) {
+           contentBlock = "**Detailed Content Instructions (Strictly follow these):**\n" + userContent;
+        } else {
+           contentBlock = "**Detailed Content Instructions:**\nAuto-generate relevant, accurate, and high-value educational content based on the topic.";
+        }
+        finalPrompt = finalPrompt.replace("[USER_CONTENT_BLOCK]", contentBlock);
+        
+        formData.append("prompt", finalPrompt);
+        formData.append("mode", "infographic");
+      } else {
+        // Product Mode Logic
+        let finalPrompt = selectedTemplate.prompt
+          .replaceAll("[TOPIC]", `${brandName} Product Showcase`)
+          .replace("educational Instagram infographic", "commercial product showcase infographic");
+          
+        let contentBlock = `
+          **PRODUCT SHOWCASE MODE**
+          Brand: ${brandName || "Generic"}
+          Products provided as images.
+          
+          **Instructions:**
+          1. Arrange the provided products in a stunning composition based on the template style (${selectedTemplate.name}).
+          2. Use the "User Content" below for specific selling points if provided.
+          3. Ensure the product images are integrated seamlessly.
+          
+          ${userContent ? `**Specific Selling Points:**\n${userContent}` : ""}
+        `;
+        
+        finalPrompt = finalPrompt.replace("[USER_CONTENT_BLOCK]", contentBlock);
+        
+        formData.append("prompt", finalPrompt);
+        formData.append("mode", "infographic_product");
+        
+        productImages.forEach((file) => {
+          formData.append("productImages", file);
+        });
+      }
 
       const response = await fetch("/api/generate-photoshoot", {
         method: "POST",
@@ -184,54 +237,97 @@ export default function InfographicInterface() {
           {/* Left Panel: Inputs */}
           <div className="lg:col-span-5 space-y-8">
             
-            {/* Topic Input */}
-            <div className="space-y-4">
-              <label className="flex items-center gap-2 text-sm font-bold text-neutral-400 uppercase tracking-wider">
-                <Lightbulb className="w-4 h-4 text-yellow-400" />
-                What's your topic? <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <Textarea
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  placeholder="e.g. 'Camera Parts', 'How to make Coffee', 'Benefits of Yoga'..."
-                  className="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 text-lg text-white placeholder:text-neutral-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all min-h-[80px] resize-none"
-                />
-              </div>
-            </div>
+            <Tabs defaultValue="topic" onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 bg-[#111] mb-6 p-1 rounded-2xl border border-white/10">
+                <TabsTrigger value="topic" className="rounded-xl data-[state=active]:bg-purple-600 data-[state=active]:text-white">Topic Based</TabsTrigger>
+                <TabsTrigger value="product" className="rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white">Product Showcase</TabsTrigger>
+              </TabsList>
 
-            {/* User Content Input (Optional) */}
-            <div className="space-y-4">
-              <label className="flex items-center gap-2 text-sm font-bold text-neutral-400 uppercase tracking-wider">
-                <Type className="w-4 h-4 text-blue-400" />
-                Specific Content Usually (Optional)
-              </label>
-              <div className="relative">
-                <Textarea
-                  value={userContent}
-                  onChange={(e) => setUserContent(e.target.value)}
-                  placeholder="e.g. List specific steps, facts, or comparison points you want to include..."
-                  className="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 text-base text-white placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all min-h-[100px] resize-none"
-                />
-              </div>
-            </div>
+              <TabsContent value="topic" className="space-y-8 mt-6">
+                {/* Topic Input */}
+                <div className="space-y-4">
+                  <label className="flex items-center gap-2 text-sm font-bold text-neutral-400 uppercase tracking-wider">
+                    <Lightbulb className="w-4 h-4 text-yellow-400" />
+                    What's your topic? <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Textarea
+                      value={topic}
+                      onChange={(e) => setTopic(e.target.value)}
+                      placeholder="e.g. 'Camera Parts', 'How to make Coffee', 'Benefits of Yoga'..."
+                      className="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 text-lg text-white placeholder:text-neutral-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all min-h-[80px] resize-none"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
 
-            {/* Template Selection */}
-            <div className="space-y-4">
+              <TabsContent value="product" className="space-y-8 mt-6">
+                {/* Brand Name Input */}
+                 <div className="space-y-4">
+                  <label className="flex items-center gap-2 text-sm font-bold text-neutral-400 uppercase tracking-wider">
+                    <ShoppingBag className="w-4 h-4 text-blue-400" />
+                    Brand & Product Name <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={brandName}
+                      onChange={(e) => setBrandName(e.target.value)}
+                      placeholder="e.g. Nike Air Max, Apple Watch Ultra..."
+                      className="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 text-lg text-white placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Image Upload */}
+                <div className="space-y-4">
+                  <label className="flex items-center gap-2 text-sm font-bold text-neutral-400 uppercase tracking-wider">
+                    <ImageIcon className="w-4 h-4 text-green-400" />
+                    Upload Products (Max 3) <span className="text-red-500">*</span>
+                  </label>
+                  
+                  <div className="grid grid-cols-3 gap-4">
+                    {productImages.map((img, idx) => (
+                      <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-white/20 group">
+                        <img src={URL.createObjectURL(img)} alt="Product" className="w-full h-full object-cover" />
+                        <button 
+                          onClick={() => removeImage(idx)}
+                          className="absolute top-1 right-1 bg-black/50 p-1 rounded-full text-white hover:bg-red-500 transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                    
+                    {productImages.length < 3 && (
+                      <label className="aspect-square rounded-xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center cursor-pointer hover:border-white/30 hover:bg-white/5 transition-all">
+                        <Plus className="w-6 h-6 text-neutral-500 mb-2" />
+                        <span className="text-[10px] text-neutral-500 font-bold uppercase">Add Image</span>
+                        <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                      </label>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+
+            </Tabs>
+
+            {/* Template Selection (Shared) */}
+            <div className="space-y-4 mt-8">
               <label className="flex items-center gap-2 text-sm font-bold text-neutral-400 uppercase tracking-wider">
                 <Palette className="w-4 h-4 text-purple-400" />
                 Choose Structure
               </label>
               
               <div className="grid grid-cols-1 gap-3">
-                {INFOGRAPHIC_TEMPLATES.map((template) => (
+                {(activeTab === 'product' ? PRODUCT_TEMPLATES : INFOGRAPHIC_TEMPLATES).map((template) => (
                   <button
                     key={template.id}
                     onClick={() => setSelectedTemplate(template)}
                     className={cn(
                       "group relative p-4 rounded-xl border-2 transition-all text-left flex items-start gap-4 hover:bg-white/5",
                       selectedTemplate?.id === template.id 
-                        ? "border-purple-500 bg-purple-500/5 shadow-[0_0_15px_rgba(168,85,247,0.15)]" 
+                        ? (activeTab === 'product' ? "border-blue-500 bg-blue-500/5" : "border-purple-500 bg-purple-500/5")
                         : "border-white/5 hover:border-white/10"
                     )}
                   >
@@ -247,7 +343,7 @@ export default function InfographicInterface() {
                     </div>
                     {selectedTemplate?.id === template.id && (
                       <div className="absolute top-4 right-4">
-                        <Sparkles className="w-4 h-4 text-purple-400" />
+                        <Sparkles className={cn("w-4 h-4", activeTab === 'product' ? "text-blue-400" : "text-purple-400")} />
                       </div>
                     )}
                   </button>
@@ -255,26 +351,75 @@ export default function InfographicInterface() {
               </div>
             </div>
 
+            {/* User Content Input (Shared) */}
+            <div className="space-y-4 mt-8">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 text-sm font-bold text-neutral-400 uppercase tracking-wider">
+                  <Type className="w-4 h-4 text-blue-400" />
+                  Specific Content (Optional)
+                </label>
+                {(activeTab === 'topic' || (activeTab === 'product' && brandName)) && (
+                   <button
+                   onClick={async () => {
+                     const query = activeTab === 'topic' ? topic : (brandName + " Products");
+                     if (!query.trim()) {
+                       setError("Please enter a topic/brand first!");
+                       return;
+                     }
+                     const btn = document.getElementById("auto-content-btn");
+                     if (btn) {
+                         const originalText = btn.innerHTML;
+                         btn.innerHTML = 'Generating...';
+                         btn.style.opacity = '0.7';
+                         try {
+                            const content = await generateInfographicContent(query);
+                            setUserContent(content);
+                         } catch (e) {
+                            console.error(e);
+                         } finally {
+                            btn.innerHTML = originalText;
+                            btn.style.opacity = '1';
+                         }
+                     }
+                   }}
+                   id="auto-content-btn"
+                   className="text-xs bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full border border-blue-500/20 transition-all flex items-center gap-1"
+                 >
+                   <Sparkles className="w-3 h-3" />
+                   Auto-Generate
+                 </button>
+                )}
+              </div>
+              <div className="relative">
+                <Textarea
+                  value={userContent}
+                  onChange={(e) => setUserContent(e.target.value)}
+                  placeholder={activeTab === 'product' ? "e.g. Highlight 'Durability', 'Comfort', 'Summer Sale'..." : "e.g. List specific steps, facts, or comparison points..."}
+                  className="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 text-base text-white placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all min-h-[150px] resize-none"
+                />
+              </div>
+            </div>
+
             {/* Generate Button */}
             <button
               onClick={handleGenerate}
-              disabled={isGenerating || !topic.trim() || !selectedTemplate}
+              disabled={isGenerating || (activeTab === 'topic' && !topic.trim()) || (activeTab === 'product' && productImages.length === 0) || !selectedTemplate}
               className={cn(
-                "w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg mt-4",
-                isGenerating || !topic.trim() || !selectedTemplate
+                "w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg mt-8",
+                 (isGenerating || (activeTab === 'topic' && !topic.trim()) || (activeTab === 'product' && productImages.length === 0) || !selectedTemplate)
                   ? "bg-neutral-800 text-neutral-500 cursor-not-allowed"
-                  : "bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] hover:scale-[1.02]"
+                  : (activeTab === 'product' ? "bg-gradient-to-r from-blue-600 to-cyan-600 hover:shadow-[0_0_30px_rgba(37,99,235,0.4)]" : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]") + " text-white hover:scale-[1.02]"
               )}
             >
               {isGenerating ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Visualizing Concept...
+                  {activeTab === 'product' ? "Designing Showcase..." : "Visualizing Concept..."}
                 </>
               ) : (
                 <>
                   <Wand2 className="w-5 h-5" />
-                  Generate Infographic
+                  {activeTab === 'product' ? "Generate Showcase" : "Generate Infographic"}
                 </>
               )}
             </button>
@@ -284,7 +429,7 @@ export default function InfographicInterface() {
             {/* Right Panel: Preview */}
             <div className="lg:col-span-7 space-y-6">
             <div className="sticky top-8">
-              <div className="aspect-[9/16] w-full max-w-sm mx-auto rounded-3xl bg-[#111] border border-white/10 overflow-hidden relative flex items-center justify-center shadow-2xl">
+              <div className="aspect-[3/4] w-full max-w-md mx-auto rounded-3xl bg-[#111] border border-white/10 overflow-hidden relative flex items-center justify-center shadow-2xl">
                 
                 <AnimatePresence mode="wait">
                   {generatedImage ? (
