@@ -52,4 +52,14 @@ export const MINI_APPS: MiniApp[] = [
     color: "#FF5500",
     gradient: "from-orange-500 to-red-600",
   },
+  {
+    id: "infographics",
+    name: "AI Infographics",
+    description: "Turn complex topics into viral, educational Instagram infographics. Visual learning made instant.",
+    href: "/trendings/infographics",
+    icon: "📊",
+    status: "live",
+    color: "#A855F7",
+    gradient: "from-purple-500 to-indigo-600",
+  },
 ];

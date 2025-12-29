@@ -55,28 +55,36 @@ export default function MusicTrendingInterface() {
   // Check authentication status
   // Check authentication status & restore state
   useEffect(() => {
-    const checkAuthAndRestore = async () => {
+    // 1. Initial Session Check
+    const checkInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsLoggedIn(!!session);
-
-      // Restore state if returning from login (or just page reload if persisted)
-      const savedState = localStorage.getItem('music_trend_state');
-      if (savedState) {
-        try {
-          const parsed = JSON.parse(savedState);
-          if (parsed.userImage) setUserImage(parsed.userImage);
-          if (parsed.playlistImage) setPlaylistImage(parsed.playlistImage);
-          if (parsed.selectedTemplate) setSelectedTemplate(parsed.selectedTemplate);
-          if (parsed.generatedImage) setGeneratedImage(parsed.generatedImage);
-          
-          // Clear state after restoring to avoid sticking
-          localStorage.removeItem('music_trend_state');
-        } catch (e) {
-          console.error("Failed to restore state", e);
-        }
-      }
     };
-    checkAuthAndRestore();
+    checkInitialSession();
+
+    // 2. Auth Listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    // 3. Restore State
+    const savedState = localStorage.getItem('music_trend_state');
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        if (parsed.userImage) setUserImage(parsed.userImage);
+        if (parsed.playlistImage) setPlaylistImage(parsed.playlistImage);
+        if (parsed.selectedTemplate) setSelectedTemplate(parsed.selectedTemplate);
+        if (parsed.generatedImage) setGeneratedImage(parsed.generatedImage);
+        
+        // Clear state after restoring to avoid sticking
+        localStorage.removeItem('music_trend_state');
+      } catch (e) {
+        console.error("Failed to restore state", e);
+      }
+    }
+
+    return () => subscription.unsubscribe();
   }, [supabase.auth]);
 
   // Restore state logic dropped for simplicity in this new component, 
