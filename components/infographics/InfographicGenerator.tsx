@@ -45,6 +45,24 @@ export default function InfographicGenerator({ mode }: InfographicGeneratorProps
     checkUser();
   }, []);
 
+  // Restore State on Mount (if returning from login)
+  useEffect(() => {
+    const savedState = sessionStorage.getItem('pendingInfographic');
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        if (parsed.mode === mode) {
+           setTopic(parsed.topic || "");
+           setBrandName(parsed.brandName || "");
+           setTargetAudience(parsed.targetAudience || "Unisex");
+           setUserContent(parsed.userContent || "");
+           setGeneratedImage(parsed.generatedImage || null);
+           sessionStorage.removeItem('pendingInfographic');
+        }
+      } catch (e) { console.error("Failed to restore state", e); }
+    }
+  }, [mode]);
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const newFiles = Array.from(e.target.files);
@@ -92,6 +110,12 @@ export default function InfographicGenerator({ mode }: InfographicGeneratorProps
 
   const handleDownload = () => {
     if (!user) {
+      // Save State
+      try {
+        const stateToSave = { mode, topic, brandName, targetAudience, userContent, generatedImage };
+        sessionStorage.setItem('pendingInfographic', JSON.stringify(stateToSave));
+      } catch (e) { console.warn("Failed to save state", e); }
+
       if (confirm("You must be signed in to download high-quality results. Sign in now?")) {
           router.push('/login');
       }

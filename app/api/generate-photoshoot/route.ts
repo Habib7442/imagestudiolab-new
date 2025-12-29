@@ -80,10 +80,10 @@ export async function POST(req: NextRequest) {
     CRITICAL INSTRUCTIONS:
     1. ${userImageBase64 ? "The first image provided is the USER/BASE IMAGE. Preserve its core elements unless asked to change." : "Create a purely graphical/visual composition based on the prompt."}
     2. ${productInstruction}
-    3. ${isInfographic ? "The output must be a 3:4 aspect ratio portrait image. Focus on clarity and high contrast for social media. Text must be legible." : (isVertical ? "The output must be a 9:16 aspect ratio vertical image. Focus on clarity and high contrast for social media." : "The output must be a 1:1 aspect ratio image.")}
-    4. ${isInfographic ? "ENSURE ALL TEXT SCALES AND ICONS ARE SHARP, LEGIBLE, AND CORRECTLY SPELLED. Use simple, bold typography." : (isMusicTrend ? "ENSURE TEXT ON THE UI BACKGROUND IS SHARP AND READABLE. NO MOTION BLUR ON THE SCREEN." : "Make it look like a professional photoshoot. High end, sexy, aesthetic.")}
+    3. ${isInfographic ? "The output must be a 3:4 aspect ratio portrait image. Focus on clarity and high contrast for social media. Text must be legible. USE A CLEAN, MINIMALIST LAYOUT." : (isVertical ? "The output must be a 9:16 aspect ratio vertical image. Focus on clarity and high contrast for social media." : "The output must be a 1:1 aspect ratio image.")}
+    4. ${isInfographic ? "TYPOGRAPHY & READABILITY: Ensure Body Text is LARGE ENOUGH to be perfectly legible. Do NOT use tiny, blurry fonts. Increase line spacing and padding. Headers should be bold but balanced (not appearing comically large). Text MUST fit neatly within containers without overcrowding. Use high contrast." : (isMusicTrend ? "ENSURE TEXT ON THE UI BACKGROUND IS SHARP AND READABLE. NO MOTION BLUR ON THE SCREEN." : "Make it look like a professional photoshoot. High end, sexy, aesthetic.")}
     5. ${negativePrompt ? `NEGATIVE PROMPT (Do NOT include): ${negativePrompt}` : ""}
-    6. MANDATORY: Add a small, subtle text at the very bottom center of the image: "Created by ImageStudioLab".
+    6. MANDATORY: Place a clear, legible watermark "Created by ImageStudioLab" at the very bottom center.
     `;
 
     const contentParts: any[] = [{ text: finalPrompt }];
