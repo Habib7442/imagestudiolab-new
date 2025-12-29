@@ -19,6 +19,8 @@ export async function POST(req: NextRequest) {
        if (!prompt) return NextResponse.json({ error: "Missing prompt" }, { status: 400 });
     } else if (mode === "infographic_product") {
        if (!productImages || productImages.length === 0) return NextResponse.json({ error: "Missing product images" }, { status: 400 });
+    } else if (mode === "infographic_refine") {
+       if (!userImage || !prompt) return NextResponse.json({ error: "Missing image or prompt" }, { status: 400 });
     } else {
        if (!userImage || !prompt) return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
@@ -53,6 +55,8 @@ export async function POST(req: NextRequest) {
     let productInstruction = "";
     if (mode === "infographic_product") {
          productInstruction = `You are provided with ${productImagesBase64.length} product images. You MUST arrange them creatively and logically within the infographic layout. Do NOT distort the product logos or key features.`;
+    } else if (mode === "infographic_refine") {
+         productInstruction = "The first image provided is the CURRENT INFOGRAPHIC DESIGN. You must EDIT/REFINE it based on the user's request, while maintaining the overall layout and core content if not asked to change. This is an IMG2IMG editing task.";
     } else if (productImageBase64) {
       if (mode === "try-on") {
         productInstruction = "The second image provided is a CLOTHING ITEM. You must dress the USER (first image) in this EXACT clothing item. Replace the user's current outfit with this new one, fitting it perfectly to their body pose. Maintain the fabric texture and details of the clothing item.";
@@ -63,17 +67,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const isInfographic = mode === "infographic" || mode === "infographic_product";
+    const isRefine = mode === "infographic_refine";
+    const isInfographic = mode === "infographic" || mode === "infographic_product" || isRefine;
     const isMusicTrend = mode === "trending-music";
     const isVertical = isInfographic || isMusicTrend;
 
     const finalPrompt = `
-    Task: ${isInfographic ? "Generate a high-quality, split-screen or grid-based educational/commercial infographic (Portrait 3:4)." : (isMusicTrend ? "Generate a viral, cinematic social media image (Vertical 9:16)." : "Generate a high-quality, photorealistic photoshoot image.")}
+    Task: ${isRefine ? "Edit/Refine the provided infographic image (Portrait 3:4)." : (isInfographic ? "Generate a high-quality, split-screen or grid-based educational/commercial infographic (Portrait 3:4)." : (isMusicTrend ? "Generate a viral, cinematic social media image (Vertical 9:16)." : "Generate a high-quality, photorealistic photoshoot image.")) }
     Style Filter: ${filter && filter !== "undefined" ? `${filter} (Apply this aesthetic strongly)` : ""}
     User Request/Prompt: ${prompt}
     
     CRITICAL INSTRUCTIONS:
-    1. ${userImageBase64 ? "The first image provided is the USER. You MUST preserve their facial features, identity, and likeness exactly. Do not change their face." : "Create a purely graphical/visual composition based on the prompt."}
+    1. ${userImageBase64 ? "The first image provided is the USER/BASE IMAGE. Preserve its core elements unless asked to change." : "Create a purely graphical/visual composition based on the prompt."}
     2. ${productInstruction}
     3. ${isInfographic ? "The output must be a 3:4 aspect ratio portrait image. Focus on clarity and high contrast for social media. Text must be legible." : (isVertical ? "The output must be a 9:16 aspect ratio vertical image. Focus on clarity and high contrast for social media." : "The output must be a 1:1 aspect ratio image.")}
     4. ${isInfographic ? "ENSURE ALL TEXT SCALES AND ICONS ARE SHARP, LEGIBLE, AND CORRECTLY SPELLED. Use simple, bold typography." : (isMusicTrend ? "ENSURE TEXT ON THE UI BACKGROUND IS SHARP AND READABLE. NO MOTION BLUR ON THE SCREEN." : "Make it look like a professional photoshoot. High end, sexy, aesthetic.")}

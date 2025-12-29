@@ -1,6 +1,6 @@
 "use strict";
 import React, { useState, useEffect } from "react";
-import { Sparkles, Loader2, Wand2, Lightbulb, Type, Palette, ShoppingBag, ImageIcon, Plus, X, Download } from "lucide-react";
+import { Sparkles, Loader2, Wand2, Lightbulb, Type, Palette, ShoppingBag, ImageIcon, Plus, X, Download, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -19,11 +19,15 @@ export default function InfographicGenerator({ mode }: InfographicGeneratorProps
   const [userContent, setUserContent] = useState("");
   const [productImages, setProductImages] = useState<File[]>([]);
   const [brandName, setBrandName] = useState("");
+  const [targetAudience, setTargetAudience] = useState("Unisex");
   
   const [selectedTemplate, setSelectedTemplate] = useState<InfographicTemplate | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [refinePrompt, setRefinePrompt] = useState("");
+  const [isRefining, setIsRefining] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   const supabase = createClient();
   const router = useRouter();
@@ -32,6 +36,14 @@ export default function InfographicGenerator({ mode }: InfographicGeneratorProps
   useEffect(() => {
     setSelectedTemplate(mode === 'product' ? PRODUCT_TEMPLATES[0] : INFOGRAPHIC_TEMPLATES[0]);
   }, [mode]);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+    };
+    checkUser();
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -42,6 +54,58 @@ export default function InfographicGenerator({ mode }: InfographicGeneratorProps
 
   const removeImage = (index: number) => {
     setProductImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRefine = async () => {
+    if (!generatedImage || !refinePrompt.trim()) return;
+    
+    setIsRefining(true);
+    setError(null);
+
+    try {
+      const imageRes = await fetch(generatedImage);
+      const imageBlob = await imageRes.blob();
+      const file = new File([imageBlob], "refine_base.png", { type: "image/png" });
+
+      const formData = new FormData();
+      formData.append("userImage", file); 
+      formData.append("prompt", refinePrompt);
+      formData.append("mode", "infographic_refine");
+
+      const response = await fetch("/api/generate-photoshoot", {
+          method: "POST",
+          body: formData,
+      });
+      
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to refine image");
+      
+      setGeneratedImage(data.result);
+      setRefinePrompt("");
+    } catch (error: any) {
+       console.error(error);
+       setError(error.message || "Failed to refine image");
+    } finally {
+       setIsRefining(false);
+    }
+  };
+
+  const handleDownload = () => {
+    if (!user) {
+      if (confirm("You must be signed in to download high-quality results. Sign in now?")) {
+          router.push('/login');
+      }
+      return;
+    }
+    
+    if (generatedImage) {
+        const link = document.createElement('a');
+        link.href = generatedImage;
+        link.download = `infographic-${Date.now()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
   };
 
   const handleGenerate = async () => {
@@ -86,6 +150,7 @@ export default function InfographicGenerator({ mode }: InfographicGeneratorProps
         let contentBlock = `
           **PRODUCT SHOWCASE MODE**
           Brand: ${brandName || "Generic"}
+          Target Audience: ${targetAudience}
           Products provided as images.
           
           **Instructions:**
@@ -162,6 +227,29 @@ export default function InfographicGenerator({ mode }: InfographicGeneratorProps
                    placeholder="e.g. Nike Air Max, Apple Watch Ultra..."
                    className="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 text-lg text-white placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
                  />
+               </div>
+             </div>
+
+             <div className="space-y-4">
+               <label className="flex items-center gap-2 text-sm font-bold text-neutral-400 uppercase tracking-wider">
+                 <Users className="w-4 h-4 text-pink-400" />
+                 Target Audience
+               </label>
+               <div className="grid grid-cols-4 gap-2">
+                 {['Men', 'Women', 'Kids', 'Unisex'].map((audience) => (
+                   <button
+                     key={audience}
+                     onClick={() => setTargetAudience(audience)}
+                     className={cn(
+                       "py-3 rounded-xl border font-medium text-sm transition-all",
+                       targetAudience === audience
+                         ? "bg-pink-500/20 border-pink-500 text-pink-400 font-bold"
+                         : "bg-black/50 border-white/10 text-neutral-400 hover:bg-white/5"
+                     )}
+                   >
+                     {audience}
+                   </button>
+                 ))}
                </div>
              </div>
 
@@ -329,14 +417,13 @@ export default function InfographicGenerator({ mode }: InfographicGeneratorProps
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                          <a 
-                            href={generatedImage} 
-                            download={`infographic-${Date.now()}.png`}
-                            className="bg-white text-black px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:scale-105 transition-transform"
+                          <button 
+                            onClick={handleDownload}
+                            className="bg-white text-black px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:scale-105 transition-transform cursor-pointer"
                           >
                             <Download className="w-5 h-5" />
                             Download
-                          </a>
+                          </button>
                         </div>
                      </div>
                   ) : (
@@ -351,9 +438,42 @@ export default function InfographicGenerator({ mode }: InfographicGeneratorProps
                   )}
               </div>
 
+               {/* Refine Section */}
+               {generatedImage && !isGenerating && (
+                 <div className="mt-6 bg-[#111] p-4 rounded-2xl border border-white/10 space-y-3">
+                    <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-2">
+                       <Wand2 className="w-3 h-3 text-purple-400" />
+                       Refine / Edit Result
+                    </label>
+                    <div className="flex gap-2">
+                       <input 
+                         type="text" 
+                         value={refinePrompt} 
+                         onChange={(e) => setRefinePrompt(e.target.value)}
+                         placeholder="e.g. Make the text bigger, darken background..."
+                         className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-all placeholder:text-neutral-600"
+                         onKeyDown={(e) => e.key === 'Enter' && handleRefine()}
+                       />
+                       <button 
+                         onClick={handleRefine}
+                         disabled={isRefining || !refinePrompt.trim()}
+                         className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl font-bold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[80px]"
+                       >
+                         {isRefining ? <Loader2 className="w-4 h-4 animate-spin" /> : "Refine"}
+                       </button>
+                    </div>
+                 </div>
+               )}
+
                {/* Captions - Only if generated */}
                {generatedImage && !isGenerating && (
-                 <CaptionsGenerator topic={mode === 'topic' ? topic : brandName} userContent={userContent} />
+                 <div className="mt-12 pt-8 border-t border-white/5 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                    <div className="flex items-center gap-2 mb-6">
+                        <Type className="w-4 h-4 text-neutral-500" />
+                        <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">Viral Captions</h3>
+                    </div>
+                    <CaptionsGenerator topic={mode === 'topic' ? topic : brandName} userContent={userContent} />
+                 </div>
                )}
         </div>
       </div>
