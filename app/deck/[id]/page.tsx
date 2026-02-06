@@ -86,13 +86,13 @@ export default function DeckPage({ params }: { params: Promise<{ id: string }> }
     setSelectedOption(index);
     setIsAnswered(true);
     
-    if (index === deck.quiz_data[currentQuestion].correctAnswer) {
+    if (deck.quiz_data?.[currentQuestion]?.correctAnswer !== undefined && index === deck.quiz_data[currentQuestion].correctAnswer) {
       setScore(prev => prev + 1);
     }
   };
 
   const nextQuestion = () => {
-    if (currentQuestion < deck.quiz_data.length - 1) {
+    if (deck.quiz_data && currentQuestion < deck.quiz_data.length - 1) {
       setCurrentQuestion(prev => prev + 1);
       setSelectedOption(null);
       setIsAnswered(false);
@@ -157,7 +157,9 @@ export default function DeckPage({ params }: { params: Promise<{ id: string }> }
     </div>
   );
 
-  const currentQuiz = deck.quiz_data[currentQuestion];
+  // Safety check for quiz_data
+  const hasQuizData = deck.quiz_data && Array.isArray(deck.quiz_data) && deck.quiz_data.length > 0;
+  const currentQuiz = hasQuizData ? deck.quiz_data[currentQuestion] : null;
   const allImages = Array.from(new Set([
     ...(deck.diagram_urls || []), 
     deck.diagram_url, 
@@ -268,7 +270,7 @@ export default function DeckPage({ params }: { params: Promise<{ id: string }> }
                     </div>
                     {deck.quiz_data?.length > 0 && (
                         <div className="px-4 py-1.5 bg-slate-800 rounded-xl text-[10px] font-black text-slate-500 border border-white/5 uppercase">
-                            Question {currentQuestion + 1} of {deck.quiz_data.length}
+                            Question {currentQuestion + 1} of {deck.quiz_data?.length || 0}
                         </div>
                     )}
                 </div>
@@ -350,7 +352,7 @@ export default function DeckPage({ params }: { params: Promise<{ id: string }> }
                                                 onClick={nextQuestion}
                                                 className="mt-8 w-full py-5 bg-teal-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-xs hover:shadow-2xl transition-all flex items-center justify-center gap-3 group"
                                             >
-                                                {currentQuestion === deck.quiz_data.length - 1 ? 'View Results' : 'Next Scenario'}
+                                                {currentQuestion === (deck.quiz_data?.length || 1) - 1 ? 'View Results' : 'Next Scenario'}
                                                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                             </button>
                                         )}
@@ -363,7 +365,7 @@ export default function DeckPage({ params }: { params: Promise<{ id: string }> }
                                     <Trophy className="w-12 h-12" />
                                 </div>
                                 <h2 className="text-4xl font-black text-white mb-2">Quiz Results</h2>
-                                <div className="text-6xl font-black text-teal-400 mb-6">{Math.round((score/deck.quiz_data.length)*100)}%</div>
+                                <div className="text-6xl font-black text-teal-400 mb-6">{Math.round((score/(deck.quiz_data?.length || 1))*100)}%</div>
                                 <p className="text-slate-500 font-bold mb-10">Subject Mastery Proficiency</p>
                                 <button onClick={resetQuiz} className="w-full py-5 bg-white text-slate-900 rounded-3xl font-black uppercase tracking-widest text-xs hover:bg-slate-50 transition-all flex items-center justify-center gap-3">
                                     <RotateCcw className="w-4 h-4" /> Retake Quiz
