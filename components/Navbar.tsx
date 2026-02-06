@@ -10,29 +10,52 @@ export default function Navbar() {
   const [credits, setCredits] = useState<number | null>(null);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchCredits(session.user.id);
+    // Initial check
+    const checkUser = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Auth Session Error:", error);
+        return;
       }
-    });
+      
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        fetchCredits(currentUser.id);
+      }
+    };
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-      if (user) fetchCredits(user.id);
+    checkUser();
+
+    // Listen for changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth State Changed:", event, session?.user?.email);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      
+      if (currentUser) {
+        fetchCredits(currentUser.id);
+      } else {
+        setCredits(null);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const fetchCredits = async (userId: string) => {
-    const { data } = await supabase
-      .from('users')
-      .select('credits')
-      .eq('id', userId)
-      .single();
-    
-    if (data) setCredits(data.credits);
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('credits')
+        .eq('id', userId)
+        .single();
+      
+      if (error) throw error;
+      if (data) setCredits(data.credits);
+    } catch (err) {
+      console.error("Error fetching credits:", err);
+    }
   };
 
   const login = async () => {

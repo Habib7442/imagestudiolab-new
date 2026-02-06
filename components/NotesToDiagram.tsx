@@ -128,6 +128,10 @@ export default function NotesToDiagram() {
   };
 
   const handleGenerate = async () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
     if (!notes.trim() && !selectedFile) return;
     setLoading(true);
     setLoadingStep('Initializing AI Engine...');
@@ -371,11 +375,11 @@ export default function NotesToDiagram() {
                   </div>
                   <button
                     onClick={handleGenerate}
-                    disabled={loading || (!notes.trim() && !selectedFile)}
+                    disabled={loading || (!!user && !notes.trim() && !selectedFile)}
                     className={`group relative overflow-hidden px-12 py-5 bg-slate-900 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-sm hover:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] transition-all w-full md:w-auto ${loading ? 'opacity-70' : ''}`}
                   >
                     <span className="relative z-10 flex items-center justify-center gap-3">
-                      Generate Deck
+                      {user ? 'Generate Deck' : 'Sign In to Generate'}
                       <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </span>
                     <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />

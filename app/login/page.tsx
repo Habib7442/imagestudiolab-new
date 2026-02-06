@@ -78,16 +78,16 @@ export default function AuthPage() {
       >
         <div className="text-center mb-10">
           <Link href="/" className="inline-flex items-center gap-2 mb-6 group">
-            <div className="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white font-bold text-2xl group-hover:rotate-12 transition-transform shadow-lg shadow-teal-200">D</div>
+            <img src="/logo.png" alt="Logo" className="w-10 h-10 group-hover:rotate-12 transition-transform shadow-lg shadow-teal-200" />
             <span className="font-outfit font-black text-2xl tracking-tight text-slate-900">
-              Diagram<span className="text-teal-600">AI</span>
+              ImageStudio<span className="text-teal-600">Lab</span>
             </span>
           </Link>
           <h2 className="text-3xl font-outfit font-black text-slate-900 mb-2">
-            {isLogin ? 'Welcome Back' : 'Join DiagramAI'}
+            {isLogin ? 'Welcome Back' : 'Join ImageStudioLab'}
           </h2>
           <p className="text-slate-500 font-medium">
-            {isLogin ? 'Sign in to access your clinical library' : 'Start generating high-yield medical visuals'}
+            {isLogin ? 'Sign in to access your visual study library' : 'Start generating high-yield academic concepts'}
           </p>
         </div>
 

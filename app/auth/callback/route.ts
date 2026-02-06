@@ -2,10 +2,17 @@ import { createClient } from '@/lib/supabase-server'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
-  const code = searchParams.get('code')
-  // if "next" is in search params, use it as the redirection URL
-  const next = searchParams.get('next') ?? '/'
+  const requestUrl = new URL(request.url)
+  const code = requestUrl.searchParams.get('code')
+  const next = requestUrl.searchParams.get('next') ?? '/'
+  
+  // High-reliability origin detection for production
+  let origin = requestUrl.origin;
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    origin = process.env.NEXT_PUBLIC_SITE_URL;
+  } else if (request.headers.get('x-forwarded-proto') && request.headers.get('host')) {
+    origin = `${request.headers.get('x-forwarded-proto')}://${request.headers.get('host')}`;
+  }
 
   if (code) {
     const supabase = await createClient()
