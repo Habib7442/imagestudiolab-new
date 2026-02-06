@@ -21,6 +21,18 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '10mb',
     },
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'plxyuglexvpmicfaisno.supabase.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      }
+    ]
+  }
 };
 
 export default withPWA(nextConfig);

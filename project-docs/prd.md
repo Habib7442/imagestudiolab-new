@@ -1,294 +1,144 @@
-Here is a clean, professional **PRD.md** for your **Sexy + Stylish Polaroid App** with unique viral features.
-It is written in proper PRD structure and ready to use in GitHub repo.
-
----
-
-# 📄 **PRD.md — Aesthetic Polaroid Creator (Sexy Edition)**
-
-## 🏷️ **Product Name (Working Title)**
-
-**PolaroidX – The Sexy, Stylish, Aesthetic Polaroid Maker**
-
----
-
-# 🎯 **1. Product Overview**
-
-PolaroidX is a next-generation aesthetic photo editing tool that transforms normal images into **sexy, stylish, animated, and premium Polaroid visuals** designed for Instagram, TikTok, Pinterest, and creators who want unique content that stands out.
-
-This app goes beyond traditional static polaroid frames by introducing **3D effects**, **animated frames**, **AI captions**, and **emotion-aware styling**—a combination currently not available in any photo editor.
-
----
-
-# 🌟 **2. Unique Selling Points (USPs)**
-
-1. **Dynamic Polaroids (Animated Frames)**
-
-   * Sparkle animations
-   * Neon glowing edges
-   * VHS flicker
-   * Film burn transitions
-
-2. **3D Tilt Polaroid (Device Gyroscope Parallax)**
-
-   * Frame tilts with phone movement
-   * Realistic shifting shadows
-   * Hologram-like depth
-
-3. **AI Mood Detection**
-
-   * Automatically picks filter, frame style, and caption based on the emotion/aesthetic of the image.
-
-4. **Aesthetic AI Captions**
-
-   * Sexy, flirty, cute, minimal, mood-based handwritten captions generated automatically.
-
-5. **Premium Designer Polaroid Packs**
-
-   * Y2K glossy
-   * Cyberpunk neon
-   * Luxury gold-foil
-   * Dark academia
-   * Minimal white editorial
-
-6. **Cinematic Polaroid**
-
-   * Slow zoom + film grain + ambient light flicker
-   * Creates a mini-movie feel
-
-7. **AI Cutout Polaroid Scenes**
-
-   * User is cut out and placed into beautiful real-world polaroid scenes.
-
----
-
-# 🧑‍💻 **3. Target Users**
-
-* Instagram content creators
-* Pinterest aesthetic lovers
-* TikTok users
-* Photographers
-* Couples creating romantic edits
-* Fashion/lifestyle influencers
-* People who want luxury / premium style visuals
-
----
-
-# 🎯 **4. Key Goals**
-
-### Primary Goals
-
-* Create the most visually aesthetic, animated, stylish polaroid creator.
-* Provide effects that no other photo apps offer.
-* Make users post their results → viral organic growth.
-
-### Secondary Goals
-
-* Offer paid premium frames and animations.
-* Enable social sharing and watermarked export for branding.
-
----
-
-# 🧩 **5. Core Features (MVP)**
-
-## 5.1 Upload & Basic Editor
-
-* Upload image (JPG/PNG)
-* Resize & crop inside polaroid frame
-* Rotate & zoom
-
-## 5.2 Polaroid Frame Styles
-
-* 10 base frames (white, black, retro, minimal, Y2K, neon)
-
-## 5.3 Filters
-
-* 8 vintage filters
-* Film grain + light leaks
-* VHS mode
-
-## 5.4 Caption Area
-
-* Handwritten fonts
-* AI-generated caption suggestions
-* Option for user to write their own text
-
-## 5.5 Export
-
-* PNG (static)
-* MP4 (animated polaroid)
-* GIF
-
----
-
-# 🚀 **6. Advanced Unique Features (Viral Extras)**
-
-## 6.1 Animated Polaroids
-
-* Sparkle
-* Neon glow pulse
-* Shadow movement
-* VHS glitch
-* Dust/flicker
-
-## 6.2 3D Tilt Parallax
-
-* Polaroid frame moves with device tilt
-* Shadow reacts dynamically
-* Gives high-fashion 3D look
-
-## 6.3 AI Mood Engine
-
-Analyzes:
-
-* colors
-* face emotion
-* background environment
-
-Outputs:
-
-* matching filter
-* matching frame color
-* matching caption tone
-
-## 6.4 Cinematic Mode
-
-* Slow zoom-in effect
-* Subtle grain
-* Ambient lighting flicker
-* Exports as reel-ready MP4
-
-## 6.5 AI Cutout Mode
-
-* Remove background
-* Place user into a real polaroid environment:
-
-  * café table
-  * desk with lamp
-  * scrapbook
-  * luxury magazine
-
----
-
-# 📐 **7. System Architecture**
-
-### Frontend
-
-* **Next.js 16**
-* **Server Actions**
-* Tailwind CSS
-* GSAP for animations
-* Framer Motion for transitions
-* Canvas API / WebGL (for 3D tilt)
-
-### Backend
-
-* Image processing:
-
-  * Sharp / custom canvas pipelines
-  * AI caption: Gemini / Vertex AI
-
-### Storage
-
-* Supabase or Firebase
-* CDN optimized image delivery
-
-### Export Engine
-
-* Canvas
-* FFmpeg (server actions) for video export
-
----
-
-# 📱 **8. User Flow**
-
-1. User uploads a photo
-2. Selects Polaroid style
-3. Applies filter
-4. Adds/auto-generates sexy caption
-5. Picks animation / 3D effect
-6. Preview
-7. Export (PNG/MP4/GIF)
-8. Share to Instagram / TikTok
-
----
-
-# 💰 **9. Monétization**
-
-### Free Users
-
-* Basic frames
-* Basic filters
-* Watermark
-
-### Pro Users (Subscription)
-
-* Premium designer frames
-* All animated frames
-* All 3D effects
-* No watermark
-* High-res export
-* AI emotion-based frames
-* AI cutout scenes
-
----
-
-# 🗓️ **10. Roadmap**
-
-### **Week 1–2**
-
-* UI design
-* Polaroid generator basics
-* Frame overlays
-* Filters
-
-### **Week 3–4**
-
-* Caption engine
-* Animated polaroids
-* Export system
-
-### **Week 5–6**
-
-* AI mood engine
-* AI cutout scenes
-* Premium assets
-
-### **Week 7**
-
-* Testing + Optimization
-
-### **Week 8**
-
-* Launch on web
-* Later: mobile version
-
----
-
-# 🐞 **11. Risks & Challenges**
-
-* Performance of real-time animations
-* Video export times
-* 3D parallax requiring device sensors
-* High-quality AI cutouts may demand GPU
-
----
-
-# 📊 **12. Success Metrics**
-
-* Export rate
-* Share rate (IG/TikTok)
-* Daily active users
-* Premium conversion %
-* Average edit time
-* Virality score (shares/user)
-
----
-
-If you want, I can also create:
-
-✅ **UI wireframes**
-✅ **Folder structure for Next.js 16 with server actions**
-✅ **Actual polaroid frame assets (PNG)**
-✅ **Feature list for GitHub Issues**
-
-Just tell me!
+# Product Requirements Document (PRD)
+
+## Product Overview
+**Product Name**: DiagramAI (on imagestudiolab.com/diagramai)  
+**Tagline**: "Paste notes, get exam-ready Anki decks. Save 150 hours per semester."  
+**Target Users**: Indian MBBS students (1st-4th year), NEET-PG aspirants, medical college groups  
+**Core Value Prop**: Automates the entire "notes → diagrams → Anki flashcards → study" workflow, eliminating 95% of manual work while ensuring MBBS/NEET exam accuracy.  
+**Pricing**: Freemium → ₹299/mo (Paid), ₹599/mo (Premium)  
+**Success Metric**: 20 paying beta users @ ₹149/mo within 30 days; 40% MoM growth via deck sharing.
+
+## Problem Statement
+Medical students spend 5-10 hours/week manually creating Anki flashcards from lecture notes:  
+- Read verbose textbooks → Google diagrams (wrong styles/labels) → Screenshot → Manual Anki import with image occlusion → Tag by topic → Repeat 200x/semester  
+- **Total**: 150+ hours/semester wasted on formatting, not studying  
+- **Free AI fails**: ChatGPT/Gemini gives inconsistent diagrams; no Anki export, no curriculum tagging, no bulk processing  
+**Pain Quote**: "Drawing brachial plexus 20 times to memorize it is hell. ChatGPT drawings are artistic garbage for exams." [r/indianmedschool]
+
+## Solution & Key Features
+Transform raw notes/PDFs into production-ready Anki decks with medical-grade diagrams.
+
+### MVP Features (Phase 1 - 2 weeks)
+| Feature | Description | User Flow | Tech |
+|---------|-------------|-----------|------|
+| **Notes Input** | Paste text, upload PDF/images, or type topic | Drag-drop → "Process Notes" | Gemini 3 extracts key anatomy/pathology terms |
+| **AI Diagrams** | Generate labeled, exam-style diagrams | Auto-prompts Nano Banana: "Medical diagram of [structure], labeled, Netter's style" | Nano Banana Pro (batch mode) |
+| **Anki Export** | One-click .apkg file with image occlusion cards | "Export to Anki" → Instant download | HTML/CSS occlusion + ZIP packaging |
+| **Basic Library** | Save/reuse past diagrams | Search by topic/body system | Supabase storage |
+
+### Paid Tier Features (Phase 2 - Week 3-4)
+| Feature | Description | Value Add |
+|---------|-------------|-----------|
+| **Bulk Generation** | Process entire lecture notes → 50+ diagrams | 2min vs 50hrs manual |
+| **Image Occlusion** | Auto-create cloze cards (hide labels) | Core Anki medical workflow |
+| **MBBS Tagging** | Auto-tag: "1st Year Anatomy", "NEET-PG High-Yield" | Exam organization |
+| **Quiz Generator** | 5 MCQs per diagram | Active recall built-in |
+
+### Premium Tier (Month 2+)
+- Study analytics (mastery heatmaps)
+- Spaced repetition scheduler
+- Collaborative decks (share with study group)
+- Mobile PWA + offline mode
+- Custom styles (professor preferences)
+
+## User Journey
+```
+1. Student pastes lecture notes: "Describe coronary arteries and their branches"
+2. AI extracts: ["LAD", "RCA", "Circumflex", "anastomoses"]
+3. Generates 5 diagrams: [normal, CAD variants, angiogram views]
+4. Creates 20 Anki cards: [occlusion, labeling, MCQs]
+5. Tags: "Cardiology, 2nd Year, NEET-PG"
+6. One-click .apkg → Import to Anki → Study
+Time: 2 minutes vs 2 hours manual
+```
+
+## Technical Architecture
+```
+Frontend: Next.js 15 + Tailwind + Uploadthing
+Backend: Supabase (Auth, Storage, Edge Functions)
+AI Pipeline:
+├── Gemini 3: Text extraction, quiz generation, tagging
+├── Nano Banana Pro: Medical diagrams (batch API)
+├── Anki Formatter: HTML/CSS occlusion → .apkg
+Storage: Supabase Vector (searchable diagram library)
+Workflow: Supabase Edge Functions (upload → trigger pipeline)
+```
+
+**API Flow** (Edge Function):
+```javascript
+// Pseudo-code
+export async function createStudyDeck({ notes, userId }) {
+  const topics = await gemini.extractTopics(notes);
+  const diagrams = await nanoBanana.batchGenerate(topics.map(t => medicalPrompt(t)));
+  const cards = await gemini.createAnkiCards(diagrams);
+  const apkg = anki.pack(cards, diagrams);
+  await supabase.storage.from('decks').upload(`${userId}/${deckId}.apkg`, apkg);
+  return deckUrl;
+}
+```
+
+## Moats & Defensibility
+1. **Anki Lock-in**: Once students have 200+ diagrams in your system, switching costs are huge
+2. **MBBS Curriculum Knowledge**: Tags for "RUHS exams", "spotters", "viva priority"
+3. **Consistent Medical Style**: Pre-tested prompts ensure Netter's/Gray's accuracy
+4. **Viral Loop**: "Share deck" → Classmates sign up → Group subscriptions
+
+## Monetization & Pricing
+```
+Free:     10 diagrams/mo, manual Anki export
+Paid:     ₹299/mo - Unlimited + automation (80% users)
+Premium:  ₹599/mo - Analytics + mobile (20% upsell)
+Lifetime: ₹4,999 - Early adopters
+Team:     ₹999/mo - 5 students (study groups)
+```
+**LTV Math**: ₹299 × 12mo avg × 30% retention = ₹3,588 LTV  
+**CAC**: ₹0 (viral deck sharing) → 100% margins
+
+## Success Metrics
+| Metric | Week 4 Target | Month 3 Target |
+|--------|---------------|----------------|
+| Signups | 100 | 1,000 |
+| Paying Users | 20 @ ₹149 beta | 100 @ ₹299 |
+| Diagrams Generated | 2,000 | 20,000 |
+| Churn | - | <10%/mo |
+| NPS | 8+ | 9+ |
+
+## Validation Plan
+**Week 0: Pre-launch**
+1. Post on r/indianmedschool: "MBBS students: How many hours/week making Anki cards?"
+2. DM 20 students: "Would you pay ₹149/mo to automate this?"
+3. Build landing page → 50 email signups
+
+**Beta Success Criteria**: 20 paying users generating 100 decks = Product-Market Fit
+
+## Launch Roadmap
+```
+Week 1: MVP (text → diagram → basic Anki)
+Week 2: PDF upload + bulk processing
+Week 3: Beta launch (₹149/mo, 50 users cap)
+Week 4: Iterate based on feedback
+Month 2: Premium features + mobile PWA
+Month 3: NEET-PG season marketing push
+```
+
+## Risks & Mitigations
+| Risk | Mitigation |
+|------|------------|
+| "ChatGPT is free" | Anki integration + curriculum tagging = 10x workflow |
+| Nano Banana quality | Pre-built prompt library + human review queue |
+| Low willingness-to-pay | Start ₹149 beta → Validate price |
+| Tech complexity (.apkg) | Use `anki` npm package + test with real MBBS decks |
+
+## Go-to-Market
+1. **Organic**: r/indianmedschool, MBBS Telegram groups, Instagram Reels ("Anki decks in 2min")
+2. **Paid**: ₹5k Instagram ads targeting "MBBS notes" (₹10 CPL)
+3. **Partnerships**: Marrow/Prepladder affiliates, college WhatsApp groups
+4. **Viral**: "Share deck → Get 5 free credits"
+
+**Next Steps**:
+1. Build landing page (imagestudiolab.com/diagramai) today
+2. Run validation survey (aim: 5/10 students say "I'd pay")
+3. Code MVP text→diagram→Anki pipeline (3 days)
+4. Launch beta to first 50 signups
+
+This PRD gives you Product-Market Fit in 30 days or clear failure signals to pivot. Build the Anki integration first—that's your unbeatable moat. [anvil](https://anvil.works/case-studies/ankibuddy)
